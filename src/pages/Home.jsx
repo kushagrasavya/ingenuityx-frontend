@@ -1493,9 +1493,18 @@ export default function Home() {
             <h3 className="text-3xl font-extrabold mb-4 tracking-tight text-black">Still scrolling?</h3>
             <p className="text-gray-600 mb-10 text-sm leading-relaxed font-medium">Create a free profile to apply for live challenges, save opportunities, and track your submissions.</p>
             <div className="flex flex-col gap-3">
-              <Link to="/register" className="w-full bg-[#E92A39] hover:bg-[#ff3b4b] text-white py-4 rounded-full font-bold text-sm transition-colors block shadow-md">
-                Create Free Profile
-              </Link>
+              
+              {/* UPDATED BUTTON: Changes text and scrolls user to the Vault */}
+              <button 
+                onClick={() => {
+                  handleDismissPopup();
+                  document.getElementById('opportunities')?.scrollIntoView({ behavior: 'smooth' });
+                }} 
+                className="w-full bg-[#E92A39] hover:bg-[#ff3b4b] text-white py-4 rounded-full font-bold text-sm transition-colors block shadow-md"
+              >
+                View Challenges
+              </button>
+              
               <button onClick={handleDismissPopup} className="w-full text-gray-500 hover:text-black py-3 rounded-full text-sm font-bold transition-colors">
                 Keep exploring
               </button>
