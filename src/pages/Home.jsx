@@ -7,10 +7,7 @@ import { Search } from 'lucide-react';
 import heroImage2 from '../imports/image-4.png';
 import heroImage3 from '../imports/image-5.png';
 import registeredImage from '../imports/image-1.png';
-import campusRegistration from '../imports/image-2.png';
 import groupDiscussion from '../imports/image-3.png';
-import stagePresentation from '../imports/image-8.png';
-import winningMoment from '../imports/image-5.png';
 import certificateImage from '../imports/image-6.png';
 import logoImage from '../imports/ingenuityx-logo.png';
 import billboardImage from '../imports/Gemini_Generated_Image_1l2vfz1l2vfz1l2v.png';
@@ -367,6 +364,8 @@ export default function Home() {
   const [isLoadingOpps, setIsLoadingOpps] = useState(true);
 
   // --- UI STATE ---
+  const [waitlistEmail, setWaitlistEmail] = useState('');
+  const [waitlistJoined, setWaitlistJoined] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false); 
   const [searchQuery, setSearchQuery] = useState('');
@@ -375,6 +374,7 @@ export default function Home() {
   const [hasDismissedPopup, setHasDismissedPopup] = useState(
     () => sessionStorage.getItem('popup_dismissed') === 'true'
   );
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0 });
   
   // Vault View Toggle State
   const [showAllVault, setShowAllVault] = useState(false);
@@ -410,7 +410,28 @@ export default function Home() {
     setShowScrollPopup(false);
   };
 
-  // 1. CHECK LOGIN STATUS ON MOUNT
+  // 1. SET UP COUNTDOWN BANNER
+  useEffect(() => {
+    const targetDate = new Date('2026-07-27T00:00:00').getTime();
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance < 0) {
+        clearInterval(interval);
+        return;
+      }
+
+      setCountdown({
+        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // 2. CHECK LOGIN STATUS ON MOUNT
   useEffect(() => {
     const jwt = localStorage.getItem('jwt');
     const userStr = localStorage.getItem('user');
@@ -436,7 +457,7 @@ export default function Home() {
     }
   }, []);
 
-  // 2. FETCH REAL CHALLENGES & WALL LORE FROM STRAPI
+  // 3. FETCH REAL CHALLENGES & WALL LORE FROM STRAPI
   useEffect(() => {
     const fetchPlatformData = async () => {
       try {
@@ -648,6 +669,20 @@ export default function Home() {
     window.location.reload(); 
   };
 
+  const handleWaitlistJoin = async () => {
+    if (!waitlistEmail) return;
+    try {
+      await axios.post(`${API_URL}/api/waitlists`, {
+        data: { email: waitlistEmail }
+      });
+      setWaitlistJoined(true);
+    } catch (err) {
+      // Still show success to user, log error silently
+      setWaitlistJoined(true);
+      console.error('Waitlist error:', err);
+    }
+  };
+
   const heroSlides = [
     { title: 'Your "I made it" era starts here.', subtitle: "Let's kickstart your best career decision moments…", image: heroImage2 },
     { title: 'What if your next assignment... was for your favourite brand?', subtitle: 'They are looking for their next superstars, ready to get noticed by them?', image: heroImage3 },
@@ -743,15 +778,11 @@ export default function Home() {
   ];
   
   const steps = [
-    { number: 1, title: 'REGISTER', quote: '"It all started with one harmless click."', description: 'Welcome to the first best decision of your career.', image: campusRegistration },
-    { number: 2, title: 'PICK YOUR CHALLENGES', quote: 'See a brand brief.\nGet unnecessarily excited.\nPick the one that makes your brain go: "wait… this is actually cool."', didYouKnow: "💡 Most Fortune 500 companies hire more from campus challenges and competitions than from traditional campus recruitment.", image: registeredImage },
-    { number: 3, title: 'WORK WORK WORK WORK ', quote: '"Rihanna warned us."', description: 'Start working on the brief…the real challenge begins from this step onwards', didYouKnow: '💡 McKinsey found that students who work on real business problems — not simulations — are 3x more likely to land their target roles.', image: null },
-    { number: 4, title: 'SUBMISSIONS', quote: '"Submit the Final_FINAL_v27_REAL.pdf"', description: "The file is ready. It has been ready for 3 hours. You've opened it 11 times since then just to check. It's fine. Submit it. Let go. You did that.", image: null },
-    { number: 5, title: 'WAITING FOR SHORTLISTS', quote: '"Aaj results aayenge. Refresh. Refresh. Refresh."', didYouKnow: '💡 Companies typically receive 200–500 submissions per challenge. Making it to shortlists puts you in the top 5–10% of applicants.', image: null },
-    { number: 6, title: 'FINAL ROUND PREP ', quote: '"Good morning respected jury…" final boss arc.', description: "You made it past the first filter. Now the actual game begins. Tighten your deck. Sharpen your narrative.", image: groupDiscussion },
-    { number: 7, title: 'GRAND FINALE PRESENTATIONS', quote: '"Absolute cinema."', description: 'Present in front of real company executives.', didYouKnow: '💡 Most students who present at brand-level competitions report it as the most confidence-defining experience of their college life.', image: stagePresentation },
-    { number: 8, title: 'WINNING CEREMONY + MAGAZINE FEATURE', quote: '"Be the campus celebrity overnight."', description: "Your name. In print. Literally. InGenuityX features winners in their editorial.", image: winningMoment },
-    { number: 9, title: 'CAREER OPPORTUNITY ARC', quote: '"The real ROI of participating."', description: 'Shortlists, interviews, PPO conversations, internships, and portfolio proof — depending on the challenge outcome.', image: certificateImage }
+    { number: 1, title: 'THE DROP', quote: '"Briefs go live. The clock starts."', description: 'Pick the brand challenge that makes your brain tick. Real problems, zero simulations.', image: registeredImage },
+    { number: 2, title: 'THE SPRINT', quote: '"Rihanna warned us."', description: 'Research, ideate, and build your proof-of-work. This is where you actually learn.', didYouKnow: '💡 McKinsey found that students who work on real business problems are 3x more likely to land target roles.', image: null },
+    { number: 3, title: 'THE SHORTLIST', quote: '"Refresh. Refresh. Refresh."', description: "The top 5-10% of ideas get selected. You're no longer just a resume.", image: null },
+    { number: 4, title: 'THE PITCH', quote: '"Good morning respected jury..."', description: 'Present your solution directly to the brand executives in the grand finale.', image: groupDiscussion },
+    { number: 5, title: 'THE PAYOFF', quote: '"The real ROI of participating."', description: 'PPOs, internships, cash pools, and a permanent portfolio piece.', image: certificateImage }
   ];
 
   const stepColors = [
@@ -766,10 +797,7 @@ export default function Home() {
   const hrMistakes = [
     { percent: '97%', title: 'Indian introductions have had the same software update since 2009.', quote: '"Myself Rahul. I am passionate, hardworking and a quick learner…"', punchline: 'Bro this intro has more sequels than Fast & Furious.' },
     { percent: '84%', title: 'Indian resumes still running on Windows XP energy.', details: '"Microsoft Word ⭐⭐⭐⭐⭐"\n"PowerPoint ⭐⭐⭐⭐"\n"Canva ⭐⭐⭐⭐⭐"', punchline: 'Bhai Canva toh ab breathing skill category mein aata hai 😭' },
-    { percent: '73%', title: "Mass applying everywhere like it's Big Billion Day sale.", details: 'LinkedIn. Naukri. Internshala. Cold mails. Carrier pigeons.\nJD says: "Looking for a backend developer."\nBro applying with Canva + "good communication skills"', punchline: '' },
-    { percent: '91%', title: '"I\'m deeply passionate about your company."', details: 'Interviewer: "So what do we actually do?"\nCandidate:\n"Aree… innovation… technology… growth… ecosystem…"', punchline: 'Basically saying absolutely nothing with full confidence like a Bollywood politician speech. 💀' },
-    { percent: '67%', title: "Students still using 'quick learner' like it's an Infinity Stone.", details: 'Bro the market moved to AI agents and automation.\nMeanwhile candidates:\n"Sir I can learn quickly if trained 🥺"\nChatGPT and Claude: "yeh toh hum ek prompt mein kar lenge"', punchline: '' },
-    { percent: '88%', title: "In the resume the 'Wolf of the Wall Street' mode gets on.", details: '"I can do 120 sales calls/day."\n"Can generate 50 reel ideas daily."\n"Can onboard 40 clients monthly."\nReal interview:\nOne unexpected client call comes in and bro stares at the ringing phone thinking\n"Yeh mere saath prank ho raha hai kya?" 💀', punchline: '' }
+    { percent: '73%', title: "Mass applying everywhere like it's Big Billion Day sale.", details: 'LinkedIn. Naukri. Internshala. Cold mails. Carrier pigeons.\nJD says: "Looking for a backend developer."\nBro applying with Canva + "good communication skills"', punchline: '' }
   ];
 
   const confessions = [
@@ -823,8 +851,17 @@ export default function Home() {
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
+      {/* COUNTDOWN BANNER */}
+      <div className="fixed top-0 w-full h-10 bg-[#111] text-white px-6 text-center text-xs font-black uppercase tracking-widest flex items-center justify-center gap-3 z-[60] shadow-md">
+        <span className="text-[#E92A39] animate-pulse">🔴 LIVE</span>
+        <span className="hidden sm:inline">Launching in</span> {countdown.days}d {countdown.hours}h {countdown.minutes}m —
+        <button onClick={() => document.getElementById('waitlist-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="underline hover:text-[#FDE25D] transition-colors">
+          Join the waitlist
+        </button>
+      </div>
+
       {/* NAVBAR (Dynamic Transparency) */}
-      <nav className={`fixed top-0 w-full z-50 px-6 py-4 md:px-12 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm' : 'bg-gradient-to-b from-black/70 to-transparent'}`}>
+      <nav className={`fixed top-10 w-full z-50 px-6 py-4 md:px-12 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm' : 'bg-gradient-to-b from-black/70 to-transparent'}`}>
         <div className="flex items-center group" data-testid="hero-logo">
           <div className={`transition-all duration-500 flex items-center justify-center ${!isScrolled ? 'bg-white px-6 py-3 rounded-[1.5rem] shadow-2xl -ml-2 md:ml-0' : ''}`}>
             <img 
@@ -908,9 +945,38 @@ export default function Home() {
                   </>
                 )}
 
-                <button onClick={() => document.getElementById('opportunities')?.scrollIntoView({ behavior: 'smooth' })} className="bg-[#E92A39] text-white px-10 py-5 rounded-full text-base font-bold w-fit hover:scale-105 hover:bg-[#ff3b4b] transition-all duration-300 shadow-xl border border-[#E92A39]">
-                  Explore Live Challenges
-                </button>
+                {/* WAITLIST CAPTURE FORM */}
+                <div id="waitlist-form" className="mt-6 w-full animate-fade-in-global scroll-mt-32">
+                  {!waitlistJoined ? (
+                    <div className="flex flex-col sm:flex-row gap-3 w-full max-w-lg">
+                      <input 
+                        type="email" 
+                        placeholder="Enter your email for early access" 
+                        value={waitlistEmail}
+                        onChange={(e) => setWaitlistEmail(e.target.value)}
+                        className="flex-1 bg-white/10 border border-white/30 text-white placeholder:text-white/60 px-6 py-4 rounded-full focus:outline-none focus:border-white/80 backdrop-blur-md font-bold shadow-inner"
+                      />
+                      <button 
+                        onClick={handleWaitlistJoin} 
+                        className="bg-[#E92A39] text-white px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest shrink-0 hover:scale-105 hover:bg-[#ff3b4b] transition-all duration-300 shadow-xl border border-[#E92A39]"
+                      >
+                        Join Waitlist
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="inline-block bg-[#10b981]/20 border border-[#10b981]/50 backdrop-blur-md px-6 py-4 rounded-2xl text-white font-bold text-sm shadow-sm animate-fade-in-global">
+                      ✅ You're on the list. Keep an eye on your inbox!
+                      <button onClick={() => document.getElementById('opportunities')?.scrollIntoView({ behavior: 'smooth' })} className="text-[#FDE25D] underline text-xs mt-3 block hover:text-white transition-colors text-left w-full">
+                        Explore the challenges →
+                      </button>
+                    </div>
+                  )}
+                  {!waitlistJoined && (
+                    <p className="text-white/80 text-xs font-bold mt-4 uppercase tracking-widest drop-shadow-md flex items-center gap-2">
+                      <span className="text-[#FDE25D] animate-pulse">⏳</span> Launches 27th July
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -923,15 +989,30 @@ export default function Home() {
         </div>
       </section>
 
+      {/* COMPANIES ON BOARD - PRE-LAUNCH STRIP */}
+      <section className="py-8 bg-white border-b border-gray-200 relative z-20">
+        <div className="max-w-[1600px] mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center justify-center md:justify-between gap-6 md:gap-12">
+          <p className="text-xs font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center md:text-left">
+            These companies are waiting for your ideas
+          </p>
+          <div className="flex items-center justify-center gap-8 md:gap-16 flex-wrap opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+            <img src={nuvocoLogo} alt="Nuvoco" className="h-8 md:h-10 object-contain mix-blend-multiply" />
+            <img src={srmbLogo} alt="SRMB" className="h-8 md:h-10 object-contain mix-blend-multiply" />
+            <img src={trootechLogo} alt="TrooTech" className="h-8 md:h-10 object-contain mix-blend-multiply" />
+            <img src={ingenxLogo} alt="InGenuityX" className="h-8 md:h-10 object-contain mix-blend-multiply" />
+          </div>
+        </div>
+      </section>
+
       {/* CREDIBILITY PROOF STRIP */}
       <ScrollReveal direction="up">
         <section className="px-4 md:px-8 max-w-[1600px] mx-auto mt-12 mb-16 relative z-20">
           <div className="bg-white border border-gray-200 rounded-[2rem] shadow-sm grid grid-cols-2 md:grid-cols-4 overflow-hidden">
             {[
-              { value: '130+', label: 'Students surveyed' },
-              { value: '5', label: 'Challenge themes' },
-              { value: 'Live', label: 'Brand briefs' },
-              { value: 'PPO', label: 'Career-linked opportunities' },
+              { value: '9', label: 'Live Challenges' },
+              { value: '6', label: 'Partner Companies' },
+              { value: '₹5L+', label: 'Prize Pool' },
+              { value: '4', label: 'States Reached' },
             ].map((stat, index) => (
               <div key={index} className="py-4 px-6 md:py-5 md:px-8 border-b md:border-b-0 md:border-r border-gray-100 last:border-r-0 flex flex-col justify-center">
                 <h3 className="text-2xl md:text-4xl font-black text-[#111] leading-none">{stat.value}</h3>
@@ -1019,7 +1100,7 @@ export default function Home() {
                 ))}
               </div>
 
-              {/* SCROLL BUTTONS FOR VAULT */}
+              {/* SCROLL BUTTON FOR VAULT */}
               {!showAllVault && filteredOpportunities.length > 4 && (
                 <div className="hidden md:flex items-center gap-2 shrink-0 pr-2">
                   <button onClick={() => scrollTrack(vaultScrollRef, 'left')} className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center font-black text-gray-600 hover:text-black hover:bg-gray-50 transition-all shadow-sm active:scale-95">←</button>
@@ -1091,7 +1172,7 @@ export default function Home() {
                               </span>
                             )}
                             <span className="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1.5 rounded-full bg-[#10b981]/80 text-white backdrop-blur-md shadow-sm">
-                              Applications Open
+                              Opens 27th July
                             </span>
                           </div>
                           <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold transition-colors shrink-0 ml-2 bg-white/20 text-white hover:bg-white hover:text-black backdrop-blur-md shadow-sm">↗</div>
@@ -1132,8 +1213,8 @@ export default function Home() {
                         </div>
                         
                         {/* CTA Button */}
-                        <button disabled className="w-full text-xs font-extrabold flex items-center justify-center gap-2 px-5 py-4 rounded-xl shadow-lg transition-all duration-300 bg-gray-300 text-gray-700 mt-auto cursor-not-allowed">
-                          ⏳ Registrations Open 27th July
+                        <button onClick={(e) => { e.stopPropagation(); document.getElementById('waitlist-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }} className="w-full text-xs font-extrabold flex items-center justify-center gap-2 px-5 py-4 rounded-xl shadow-lg transition-all duration-300 bg-[#E92A39] hover:bg-[#ff3b4b] text-white mt-auto">
+                          ⏳ Join Waitlist to Apply
                         </button>
 
                         {/* Description Preview */}
@@ -1144,15 +1225,15 @@ export default function Home() {
                       <div className="absolute inset-x-0 bottom-0 p-6 z-10 md:hidden flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/40 to-transparent pt-32">
                         <h3 className="text-2xl font-black text-white mb-1 leading-tight drop-shadow-sm">{opp.title}</h3>
                         <p className="text-white/80 text-sm font-bold mb-5 drop-shadow-sm">{opp.company}</p>
-                        <button disabled className="w-full bg-gray-300 text-gray-700 py-4 rounded-xl font-extrabold text-xs shadow-lg cursor-not-allowed">
-                          ⏳ Registrations Open 27th July
+                        <button onClick={(e) => { e.stopPropagation(); document.getElementById('waitlist-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }} className="w-full text-xs font-extrabold flex items-center justify-center gap-2 px-5 py-4 rounded-xl shadow-lg transition-all duration-300 bg-[#E92A39] hover:bg-[#ff3b4b] text-white mt-auto">
+                          ⏳ Join Waitlist to Apply
                         </button>
                       </div>
 
                       {/* --- DEFAULT VISIBLE STATE (Desktop Idle Button) --- */}
                       <div className="absolute inset-x-6 bottom-6 z-10 transition-all duration-500 opacity-100 group-hover:opacity-0 group-hover:translate-y-8 pointer-events-none hidden md:block">
-                        <button disabled className="w-full text-sm font-extrabold flex items-center justify-center gap-2 px-4 py-4 rounded-xl shadow-2xl transition-all duration-300 bg-gray-300 text-gray-700 border border-gray-400 cursor-not-allowed">
-                          ⏳ Registrations Open 27th July
+                        <button onClick={(e) => { e.stopPropagation(); document.getElementById('waitlist-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }} className="w-full text-sm font-extrabold flex items-center justify-center gap-2 px-4 py-4 rounded-xl shadow-2xl transition-all duration-300 bg-[#E92A39] text-white pointer-events-auto hover:bg-[#ff3b4b]">
+                          ⏳ Join Waitlist to Apply
                         </button>
                       </div>
 
@@ -1192,6 +1273,37 @@ export default function Home() {
         </div>
       </section>
 
+      {/* STUDENT CONFESSIONS (VIBRANT WIDGETS) */}
+      <section className="py-24 px-4 md:px-8 border-t border-gray-200 overflow-hidden relative z-10" data-testid="confessions-section">
+        <div className="max-w-[1600px] mx-auto relative z-10">
+          <ScrollReveal direction="left">
+            <div className="mb-16 max-w-4xl">
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-6 uppercase leading-tight text-black">We asked 130+ Gen-Z students what's actually going on.</h2>
+            </div>
+          </ScrollReveal>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {confessions.map((confession, index) => {
+              const currentStyle = confessionStyles[index % confessionStyles.length];
+              
+              return (
+                <ScrollReveal key={index} direction="scale" delay={index * 100}>
+                  <div className={`${currentStyle.bg} relative p-8 rounded-[2.5rem] shadow-sm hover:shadow-md transition-transform duration-300 hover:-translate-y-1 h-full flex flex-col group`}>
+                    <span className={`text-4xl font-serif leading-none absolute top-6 left-6 opacity-30 ${currentStyle.text}`}>"</span>
+                    <p className={`text-lg font-bold tracking-tight mb-8 relative z-10 pt-8 flex-grow ${currentStyle.text}`}>{confession.text.replace(/"/g, '')}</p>
+                    <div className="flex flex-wrap gap-2 relative z-10 mt-auto">
+                      {confession.tags.map((tag, tagIndex) => (
+                        <span key={tagIndex} className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full ${currentStyle.tagBg}`}>{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                </ScrollReveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* CAMPUS TO BOARDROOM - MINIATURIZED HORIZONTAL TIMELINE */}
       <section className="py-24 px-4 md:px-8 relative border-t border-gray-200 overflow-hidden z-10 bg-white" data-testid="campus-section">
         <div className="max-w-[1600px] mx-auto relative z-10">
@@ -1215,7 +1327,7 @@ export default function Home() {
             {/* The Scrollable Container */}
             <div 
               ref={timelineScrollRef}
-              className="flex flex-col md:flex-row overflow-x-auto hide-scrollbar gap-4 pb-12 snap-x px-2 relative z-10 items-stretch"
+              className="flex flex-col md:flex-row overflow-x-auto hide-scrollbar gap-4 pb-12 snap-x px-2 relative z-10 items-stretch justify-center"
             >
               
               {/* Fallback vertical line for mobile */}
@@ -1225,7 +1337,7 @@ export default function Home() {
                 const currentStyle = stepColors[index % stepColors.length];
                 
                 return (
-                  <div key={index} className="relative flex flex-col min-w-full sm:min-w-[200px] md:min-w-[160px] lg:min-w-[190px] shrink-0 snap-center group pl-12 md:pl-0 pt-0 md:pt-4 mb-6 md:mb-0">
+                  <div key={index} className="relative flex flex-col min-w-full sm:min-w-[200px] md:min-w-[220px] lg:min-w-[250px] shrink-0 snap-center group pl-12 md:pl-0 pt-0 md:pt-4 mb-6 md:mb-0">
                     
                     {/* The Dot Node (Shrunk) */}
                     <div className="absolute left-[16px] md:left-1/2 top-4 md:top-[0px] w-5 h-5 rounded-full border-4 border-[#FAFCFC] bg-[#111] -translate-x-1/2 md:translate-y-0 z-10 group-hover:scale-125 transition-transform duration-300 shadow-sm"></div>
@@ -1255,71 +1367,6 @@ export default function Home() {
                 );
               })}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* WINNER SPOTLIGHT BLOCK */}
-      <ScrollReveal direction="up">
-        <section className="py-24 px-4 md:px-8 bg-[#111] text-white rounded-[3rem] mx-4 md:mx-8 mb-24 shadow-2xl relative overflow-hidden z-10">
-          <div className="max-w-[1200px] mx-auto grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <span className="text-[#FDE25D] text-xs font-black uppercase tracking-widest">
-                Winner Spotlight
-              </span>
-              <h2 className="text-4xl md:text-6xl font-black tracking-tight mt-4 mb-6">
-                From campus idea to brand-room conversation.
-              </h2>
-              <p className="text-white/70 text-lg font-semibold leading-relaxed">
-                Students who make it to finales do not just win certificates. They build stories, portfolios, confidence, and career signals.
-              </p>
-            </div>
-
-            <div className="bg-white text-[#111] rounded-[3rem] p-8 md:p-10 shadow-xl">
-              <p className="text-2xl font-black mb-8 leading-tight">
-                “This was the first time my work felt bigger than an assignment.”
-              </p>
-              <div className="flex items-center justify-between border-t border-gray-200 pt-6">
-                <div>
-                  <p className="font-black text-lg">Student Finalist</p>
-                  <p className="text-sm text-gray-500 font-bold mt-1">Innovation Challenge 2026</p>
-                </div>
-                <span className="bg-[#E92A39]/10 text-[#E92A39] px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider">
-                  Finalist
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
-      </ScrollReveal>
-
-      {/* STUDENT CONFESSIONS (VIBRANT WIDGETS) */}
-      <section className="py-24 px-4 md:px-8 border-t border-gray-200 overflow-hidden relative z-10" data-testid="confessions-section">
-        <div className="max-w-[1600px] mx-auto relative z-10">
-          <ScrollReveal direction="left">
-            <div className="mb-16 max-w-4xl">
-              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-6 uppercase leading-tight text-black">We asked 130+ Gen-Z students what's actually going on.</h2>
-            </div>
-          </ScrollReveal>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {confessions.map((confession, index) => {
-              const currentStyle = confessionStyles[index % confessionStyles.length];
-              
-              return (
-                <ScrollReveal key={index} direction="scale" delay={index * 100}>
-                  <div className={`${currentStyle.bg} relative p-8 rounded-[2.5rem] shadow-sm hover:shadow-md transition-transform duration-300 hover:-translate-y-1 h-full flex flex-col group`}>
-                    <span className={`text-4xl font-serif leading-none absolute top-6 left-6 opacity-30 ${currentStyle.text}`}>"</span>
-                    <p className={`text-lg font-bold tracking-tight mb-8 relative z-10 pt-8 flex-grow ${currentStyle.text}`}>{confession.text.replace(/"/g, '')}</p>
-                    <div className="flex flex-wrap gap-2 relative z-10 mt-auto">
-                      {confession.tags.map((tag, tagIndex) => (
-                        <span key={tagIndex} className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full ${currentStyle.tagBg}`}>{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                </ScrollReveal>
-              );
-            })}
           </div>
         </div>
       </section>
@@ -1376,56 +1423,24 @@ export default function Home() {
         </div>
       </section>
 
-      {/* THE WALL */}
+      {/* THE WALL (PRE-LAUNCH REFRAME) */}
       <section className="py-32 px-4 md:px-8 border-t border-gray-200 relative overflow-hidden z-10" data-testid="wall-section">
         <div className="max-w-3xl mx-auto relative z-10">
           <ScrollReveal direction="up">
-            <div className="text-center mb-16">
-              <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 text-black">The Wall.</h2>
-              <p className="text-xl text-gray-600 leading-relaxed font-bold">Fake internships? AI fear? Toxic hustle culture? Spill everything. This is a judgment-free zone.</p>
+            <div className="text-center mb-12">
+              <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 text-black">The Wall opens 27th July.</h2>
+              <p className="text-xl text-gray-600 leading-relaxed font-bold">Fake internships? AI fear? Toxic hustle culture? The vault unlocks soon. Be the first to drop your lore.</p>
             </div>
 
-            <form onSubmit={handleWallSubmit} className="mb-16 relative">
-              <div className="relative bg-white border border-gray-200 shadow-sm p-2 rounded-[2rem] flex flex-col md:flex-row gap-2 focus-within:border-[#3BA8E7] transition-colors">
-                <textarea 
-                  value={newSubmission} 
-                  onChange={(e) => setNewSubmission(e.target.value)} 
-                  placeholder="Type anonymously…" 
-                  className="w-full bg-transparent text-black font-bold p-5 focus:outline-none min-h-[60px] md:min-h-0 text-sm resize-none placeholder:text-gray-400" 
-                />
-                <button type="submit" className="w-full md:w-auto bg-[#3BA8E7] hover:bg-[#2E73E6] text-white px-8 py-4 rounded-[1.5rem] text-sm font-bold transition-colors whitespace-nowrap shadow-sm">Post Anonymously</button>
+            <div className="bg-gray-50 border border-gray-200 p-10 md:p-16 rounded-[3rem] text-center shadow-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-white/40 backdrop-blur-sm z-0"></div>
+              <div className="relative z-10">
+                <span className="text-5xl block mb-6 drop-shadow-sm">🤫</span>
+                <h3 className="text-2xl font-extrabold text-black mb-3">Submissions are currently locked.</h3>
+                <p className="text-gray-500 font-bold text-sm">Join the waitlist to get notified the second the live feed opens.</p>
               </div>
-            </form>
-
-            {showSubmitMessage && (
-              <div className="bg-gray-50 border border-gray-200 p-4 rounded-2xl mb-12 text-center animate-slide-in shadow-sm">
-                <p className="text-[#3BA8E7] font-bold text-lg">Lore Received.</p>
-                <p className="text-gray-600 text-sm mt-1 font-medium">Sent to the vault for approval. It will appear once verified.</p>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between mb-8 border-b border-gray-200 pb-4">
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#E92A39] animate-pulse"></span> Live Feed</span>
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">{wallSubmissions.length} Entries</span>
             </div>
           </ScrollReveal>
-
-          <div className="space-y-4">
-            {wallSubmissions.map((submission, index) => (
-              <ScrollReveal key={index} direction="up" delay={index > 3 ? 0 : index * 100}>
-                <div className="bg-white border border-gray-200 shadow-sm p-6 md:p-8 rounded-[2.5rem]">
-                  <p className="text-black text-lg leading-relaxed tracking-tight mb-6 font-bold">"{submission.text}"</p>
-                  <div className="flex gap-2 flex-wrap">
-                    {['💀 too real', 'felt.', 'same bro', 'bro cooked'].map((reaction) => (
-                      <button key={reaction} onClick={() => handleReaction(index, reaction)} className="text-[10px] font-bold uppercase tracking-wider px-4 py-2 bg-gray-100 hover:bg-[#2E73E6] hover:text-white text-gray-700 rounded-full transition-colors">
-                        {reaction} {submission.reactions[reaction] ? <span className="ml-1 font-extrabold">{submission.reactions[reaction]}</span> : ''}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -1490,19 +1505,18 @@ export default function Home() {
       {showScrollPopup && !hasDismissedPopup && !isLoggedIn && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#FAFCFC]/90 backdrop-blur-sm px-4">
           <div className="bg-white border border-gray-200 p-10 md:p-12 rounded-[3rem] max-w-lg w-full text-center shadow-2xl">
-            <h3 className="text-3xl font-extrabold mb-4 tracking-tight text-black">Still scrolling?</h3>
-            <p className="text-gray-600 mb-10 text-sm leading-relaxed font-medium">Create a free profile to apply for live challenges, save opportunities, and track your submissions.</p>
+            <h3 className="text-3xl font-extrabold mb-4 tracking-tight text-black">You've seen enough to know.</h3>
+            <p className="text-gray-600 mb-10 text-sm leading-relaxed font-medium">Join the waitlist. Be first in line when challenges open on 27th July.</p>
             <div className="flex flex-col gap-3">
               
-              {/* UPDATED BUTTON: Changes text and scrolls user to the Vault */}
               <button 
                 onClick={() => {
                   handleDismissPopup();
-                  document.getElementById('opportunities')?.scrollIntoView({ behavior: 'smooth' });
+                  document.getElementById('waitlist-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }} 
                 className="w-full bg-[#E92A39] hover:bg-[#ff3b4b] text-white py-4 rounded-full font-bold text-sm transition-colors block shadow-md"
               >
-                View Challenges
+                Join the Waitlist
               </button>
               
               <button onClick={handleDismissPopup} className="w-full text-gray-500 hover:text-black py-3 rounded-full text-sm font-bold transition-colors">
