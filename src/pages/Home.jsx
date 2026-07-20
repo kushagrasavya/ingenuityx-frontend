@@ -29,6 +29,14 @@ import trootechPosterBg from '../imports/Trootech (2).png';
 import ingenxPosterBg from '../imports/IngenX (2).png';
 import evereadyBg from '../imports/eveready.png';
 
+// --- NEW SLIDER IMAGES ---
+import sliderImg1 from '../imports/image (1).png';
+import sliderImg6 from '../imports/image (6).png';
+import sliderImg7 from '../imports/image (7).png';
+import sliderImg8 from '../imports/image (8).png';
+import sliderImg10 from '../imports/image (10).png';
+import sliderImg11 from '../imports/image (11).png';
+
 // --- ENVIRONMENT VARIABLE SETUP ---
 const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:1337';
 
@@ -131,7 +139,7 @@ function AuraCalculator() {
   );
 }
 
-// --- MINI WIDGET 2: FLAG GAME (COMPETITIVE, FIXED ENDING) ---
+// --- MINI WIDGET 2: FLAG GAME ---
 function FlagGame() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
@@ -228,7 +236,7 @@ function FlagGame() {
   );
 }
 
-// --- MINI WIDGET 3: WHACK-A-YAPPER (REACTION GAME) ---
+// --- MINI WIDGET 3: WHACK-A-YAPPER ---
 function WhackAYapper() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
@@ -376,6 +384,10 @@ export default function Home() {
   );
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0 });
   
+  // --- FEATURE SLIDER STATE ---
+  const [featureSlide, setFeatureSlide] = useState(0);
+  const featureImages = [sliderImg1, sliderImg6, sliderImg7, sliderImg8, sliderImg10, sliderImg11];
+  
   // Vault View Toggle State
   const [showAllVault, setShowAllVault] = useState(false);
 
@@ -409,6 +421,14 @@ export default function Home() {
     sessionStorage.setItem('popup_dismissed', 'true');
     setShowScrollPopup(false);
   };
+
+  // 0. FEATURE IMAGE SLIDER LOGIC
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFeatureSlide((prev) => (prev + 1) % featureImages.length);
+    }, 4000); 
+    return () => clearInterval(timer);
+  }, [featureImages.length]);
 
   // 1. SET UP COUNTDOWN BANNER
   useEffect(() => {
@@ -677,7 +697,6 @@ export default function Home() {
       });
       setWaitlistJoined(true);
     } catch (err) {
-      // Still show success to user, log error silently
       setWaitlistJoined(true);
       console.error('Waitlist error:', err);
     }
@@ -777,12 +796,37 @@ export default function Home() {
     {  title: 'Creativity', quote: '"For our \'Can we make it pop more?\' trauma survivors."', tagline: "If you've ever redesigned a deck at 2AM and felt nothing — this is your therapy. Except it pays (or gets you hired).", route: '/creativity', colors: 'bg-[#FB607E] text-white', quoteColor: 'text-white/90', taglineColor: 'text-white/90' }
   ];
   
+  // --- UPDATED: 4-STEP TIMELINE JOURNEY ---
   const steps = [
-    { number: 1, title: 'THE DROP', quote: '"Briefs go live. The clock starts."', description: 'Pick the brand challenge that makes your brain tick. Real problems, zero simulations.', image: registeredImage },
-    { number: 2, title: 'THE SPRINT', quote: '"Rihanna warned us."', description: 'Research, ideate, and build your proof-of-work. This is where you actually learn.', didYouKnow: '💡 McKinsey found that students who work on real business problems are 3x more likely to land target roles.', image: null },
-    { number: 3, title: 'THE SHORTLIST', quote: '"Refresh. Refresh. Refresh."', description: "The top 5-10% of ideas get selected. You're no longer just a resume.", image: null },
-    { number: 4, title: 'THE PITCH', quote: '"Good morning respected jury..."', description: 'Present your solution directly to the brand executives in the grand finale.', image: groupDiscussion },
-    { number: 5, title: 'THE PAYOFF', quote: '"The real ROI of participating."', description: 'PPOs, internships, cash pools, and a permanent portfolio piece.', image: certificateImage }
+    { 
+      number: 1, 
+      title: 'CATCH THE DROP', 
+      quote: '"No endless scrolling through dead listings."', 
+      description: 'Our briefs launch as timed, exclusive events. You get on the waitlist, set your alarm, and get the brief the second the clock hits zero.', 
+      image: registeredImage 
+    },
+    { 
+      number: 2, 
+      title: 'ASSEMBLE THE GRID', 
+      quote: '"Build your team for the brief, not your college."', 
+      description: 'Stop relying on whoever happens to be free in your batch. Use our Cross-Campus Matchmaking to build a surgical team—pair your strategy with a designer from NID and a coder from BITS.', 
+      didYouKnow: '💡 Cross-campus teams historically score 40% higher in strategy execution.', 
+      image: null 
+    },
+    { 
+      number: 3, 
+      title: 'THE VERDICT (NO GHOSTING)', 
+      quote: '"You will always know exactly why you didn\'t advance."', 
+      description: "If you don't make the cut, you don't get ghosted. You get The Rejection Letter—a structured, data-backed breakdown of your insight, strategy, and execution.", 
+      image: null 
+    },
+    { 
+      number: 4, 
+      title: 'THE LIVE BOARDROOM', 
+      quote: '"The whole campus ecosystem watches you plant your flag."', 
+      description: 'If you make the shortlist, you don\'t pitch to an HR intern on a hidden Zoom call. You pitch directly to C-Suite executives on our public, live-streamed Grand Finale.', 
+      image: groupDiscussion 
+    }
   ];
 
   const stepColors = [
@@ -995,11 +1039,11 @@ export default function Home() {
           <p className="text-xs font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center md:text-left">
             These companies are waiting for your ideas
           </p>
-          <div className="flex items-center justify-center gap-8 md:gap-16 flex-wrap opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-            <img src={nuvocoLogo} alt="Nuvoco" className="h-8 md:h-10 object-contain mix-blend-multiply" />
-            <img src={srmbLogo} alt="SRMB" className="h-8 md:h-10 object-contain mix-blend-multiply" />
-            <img src={trootechLogo} alt="TrooTech" className="h-8 md:h-10 object-contain mix-blend-multiply" />
-            <img src={ingenxLogo} alt="InGenuityX" className="h-8 md:h-10 object-contain mix-blend-multiply" />
+          <div className="flex items-center justify-center gap-8 md:gap-16 flex-wrap transition-all duration-500">
+            <img src={nuvocoLogo} alt="Nuvoco" className="h-8 md:h-10 object-contain" />
+            <img src={srmbLogo} alt="SRMB" className="h-8 md:h-10 object-contain" />
+            <img src={trootechLogo} alt="TrooTech" className="h-8 md:h-10 object-contain" />
+            <img src={ingenxLogo} alt="InGenuityX" className="h-8 md:h-10 object-contain" />
           </div>
         </div>
       </section>
@@ -1023,32 +1067,72 @@ export default function Home() {
         </section>
       </ScrollReveal>
 
-      {/* WHY INGENUITYX SECTION */}
-      <section className="py-24 px-4 md:px-8 bg-white relative z-10">
+      {/* --- UPDATED: NOT JUST LISTINGS SECTION (IMAGE LEFT, CARDS RIGHT) --- */}
+      <section className="py-24 px-4 md:px-8 bg-[#FAFCFC] border-y border-gray-200 relative z-10">
         <ScrollReveal direction="up">
           <div className="max-w-[1600px] mx-auto">
+            
+            {/* Header Text */}
             <div className="max-w-3xl mb-12">
-              <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6">
+              <h3 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-6 text-[#111]">
                 Not just listings. Real career signals.
-              </h2>
-              <p className="text-lg text-gray-600 font-bold">
+              </h3>
+              <p className="text-lg md:text-xl text-gray-700 font-bold max-w-2xl">
                 InGenuityX helps students move from passive applications to real brand-backed proof of work.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                ['Real Brand Briefs', 'Work on problems connected to actual companies, campaigns, and markets.'],
-                ['Proof-of-Work Portfolio', 'Every submission becomes evidence of your thinking, creativity, and execution.'],
-                ['Shortlist Visibility', 'Stand out through ideas, not just resume keywords.'],
-                ['Career Pathways', 'Unlock internships, interviews, PPO conversations, and winner features.'],
-              ].map(([title, desc], index) => (
-                <div key={index} className="p-8 rounded-[2rem] bg-[#FAFCFC] border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                  <span className="text-[#E92A39] text-sm font-black">0{index + 1}</span>
-                  <h3 className="text-2xl font-black mt-4 mb-3">{title}</h3>
-                  <p className="text-gray-600 text-sm font-semibold leading-relaxed">{desc}</p>
+            {/* 2-Column Layout */}
+            <div className="grid lg:grid-cols-2 gap-12 items-stretch">
+              
+              {/* LEFT SIDE: Image Slider View */}
+              <div className="relative rounded-[2rem] overflow-hidden shadow-sm h-full min-h-[400px] group border border-gray-200">
+                
+                {/* Dynamically render images with fade transition */}
+                {featureImages.map((img, idx) => (
+                  <img 
+                    key={idx}
+                    src={img} 
+                    alt={`Slide ${idx + 1}`} 
+                    className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 group-hover:scale-105 ${
+                      idx === featureSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                    }`} 
+                  />
+                ))}
+                
+                {/* Bottom fade for indicator visibility */}
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent z-20 pointer-events-none"></div>
+                
+                {/* Dynamic Slider Indicators */}
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                  {featureImages.map((_, idx) => (
+                    <div 
+                      key={idx}
+                      onClick={() => setFeatureSlide(idx)}
+                      className={`w-8 h-1.5 rounded-full transition-colors cursor-pointer ${
+                        idx === featureSlide ? 'bg-[#111]' : 'bg-[#D1CFC9] hover:bg-gray-400'
+                      }`}
+                    ></div>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              {/* RIGHT SIDE: 4 Cards */}
+              <div className="grid sm:grid-cols-2 gap-6">
+                {[
+                  { title: 'Real Brand Briefs', desc: 'Work on problems connected to actual companies, campaigns, and markets.' },
+                  { title: 'Proof-of-Work Portfolio', desc: 'Every submission becomes evidence of your thinking, creativity, and execution.' },
+                  { title: 'Shortlist Visibility', desc: 'Stand out through ideas, not just resume keywords.' },
+                  { title: 'Career Pathways', desc: 'Unlock internships, interviews, PPO conversations, and winner features.' }
+                ].map((item, index) => (
+                  <div key={index} className="p-8 rounded-[2rem] bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-center">
+                    <span className="text-[#E92A39] font-black text-xs block mb-4">0{index + 1}</span>
+                    <h4 className="text-xl font-black mb-3 text-[#111]">{item.title}</h4>
+                    <p className="text-gray-600 text-sm font-semibold leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+
             </div>
           </div>
         </ScrollReveal>
@@ -1304,15 +1388,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CAMPUS TO BOARDROOM - MINIATURIZED HORIZONTAL TIMELINE */}
+      {/* CAMPUS TO BOARDROOM - MINIATURIZED HORIZONTAL TIMELINE - HIDDEN VIA COMMENTS */}
+      {/* 
       <section className="py-24 px-4 md:px-8 relative border-t border-gray-200 overflow-hidden z-10 bg-white" data-testid="campus-section">
         <div className="max-w-[1600px] mx-auto relative z-10">
           <ScrollReveal direction="up">
             <div className="text-center mb-16 max-w-3xl mx-auto relative">
               <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 text-black">Campus Se Boardroom Tak</h2>
-              <p className="text-xl text-gray-600 font-bold leading-relaxed">From your first challenge submission to real brand visibility, finalist moments, and career opportunities.</p>
+              <p className="text-xl text-gray-600 font-bold leading-relaxed">We killed the 11-step corporate maze. Here are the 4 defining moments between you and the executives.</p>
               
-              {/* SCROLL BUTTONS FOR TIMELINE */}
               <div className="hidden md:flex justify-center gap-4 mt-8">
                 <button onClick={() => scrollTrack(timelineScrollRef, 'left')} className="w-12 h-12 rounded-full border border-gray-200 bg-white flex items-center justify-center font-black text-gray-600 hover:text-black hover:bg-gray-50 transition-all shadow-sm active:scale-95 text-lg">←</button>
                 <button onClick={() => scrollTrack(timelineScrollRef, 'right')} className="w-12 h-12 rounded-full border border-gray-200 bg-white flex items-center justify-center font-black text-gray-600 hover:text-black hover:bg-gray-50 transition-all shadow-sm active:scale-95 text-lg">→</button>
@@ -1321,16 +1405,13 @@ export default function Home() {
           </ScrollReveal>
 
           <div className="relative w-full overflow-hidden">
-            {/* The Horizontal Line for Desktop */}
             <div className="absolute top-[26px] left-0 w-[200%] h-1 bg-gradient-to-r from-[#2E73E6] via-[#FB607E] to-[#FDE25D] hidden md:block z-0"></div>
 
-            {/* The Scrollable Container */}
             <div 
               ref={timelineScrollRef}
               className="flex flex-col md:flex-row overflow-x-auto hide-scrollbar gap-4 pb-12 snap-x px-2 relative z-10 items-stretch justify-center"
             >
               
-              {/* Fallback vertical line for mobile */}
               <div className="absolute top-0 bottom-0 left-[26px] w-1 bg-gradient-to-b from-[#2E73E6] via-[#FB607E] to-[#FDE25D] md:hidden z-0"></div>
 
               {steps.map((step, index) => {
@@ -1339,7 +1420,6 @@ export default function Home() {
                 return (
                   <div key={index} className="relative flex flex-col min-w-full sm:min-w-[200px] md:min-w-[220px] lg:min-w-[250px] shrink-0 snap-center group pl-12 md:pl-0 pt-0 md:pt-4 mb-6 md:mb-0">
                     
-                    {/* The Dot Node (Shrunk) */}
                     <div className="absolute left-[16px] md:left-1/2 top-4 md:top-[0px] w-5 h-5 rounded-full border-4 border-[#FAFCFC] bg-[#111] -translate-x-1/2 md:translate-y-0 z-10 group-hover:scale-125 transition-transform duration-300 shadow-sm"></div>
 
                     <ScrollReveal direction="up" delay={index * 50} className="flex-1 flex flex-col mt-2 md:mt-6 h-full">
@@ -1370,6 +1450,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      */}
 
       {/* HR INTERVIEW AURA GUIDE */}
       <section className="py-32 px-4 md:px-8 overflow-hidden relative z-10 bg-[#FFF8E5]" data-testid="hr-section">
@@ -1440,6 +1521,27 @@ export default function Home() {
                 <p className="text-gray-500 font-bold text-sm">Join the waitlist to get notified the second the live feed opens.</p>
               </div>
             </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* --- NEW: COHORT 01 CALLOUT SECTION --- */}
+      <section className="py-20 px-6 md:px-12 bg-[#E92A39] text-white relative z-10 text-center">
+        <div className="max-w-4xl mx-auto">
+          <ScrollReveal direction="up">
+            <h2 className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] mb-4 text-white/70">Pre-Launch Activation</h2>
+            <h3 className="text-4xl md:text-6xl font-black tracking-tight mb-6">Become a Founding Voice.</h3>
+            <p className="text-lg font-bold mb-10 text-white/90 max-w-2xl mx-auto leading-relaxed">
+              We are recruiting 10 students to form Campus Champion Cohort 01. You get first access to briefs, a direct line to the founders, and your name in the launch issue.
+            </p>
+            <a 
+              href="https://typeform.com" 
+              target="_blank" 
+              rel="noreferrer"
+              className="inline-block bg-white text-[#E92A39] px-8 py-4 rounded-xl font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-xl text-sm"
+            >
+              Apply for Cohort 01
+            </a>
           </ScrollReveal>
         </div>
       </section>
