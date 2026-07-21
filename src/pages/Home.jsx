@@ -30,7 +30,7 @@ import ingenxPosterBg from '../imports/IngenX (2).png';
 import evereadyBg from '../imports/eveready.png';
 
 // --- NEW SLIDER IMAGES ---
-import sliderImg1 from '../imports/image (1).png';
+
 import sliderImg6 from '../imports/image (6).png';
 import sliderImg7 from '../imports/image (7).png';
 import sliderImg8 from '../imports/image (8).png';
@@ -386,7 +386,7 @@ export default function Home() {
   
   // --- FEATURE SLIDER STATE ---
   const [featureSlide, setFeatureSlide] = useState(0);
-  const featureImages = [sliderImg1, sliderImg6, sliderImg7, sliderImg8, sliderImg10, sliderImg11];
+  const featureImages = [sliderImg6, sliderImg7, sliderImg8, sliderImg10, sliderImg11];
   
   // Vault View Toggle State
   const [showAllVault, setShowAllVault] = useState(false);
@@ -703,10 +703,10 @@ export default function Home() {
   };
 
   const heroSlides = [
+    { isCustom: true, image: billboardImage },
     { title: 'Your "I made it" era starts here.', subtitle: "Let's kickstart your best career decision moments…", image: heroImage2 },
     { title: 'What if your next assignment... was for your favourite brand?', subtitle: 'They are looking for their next superstars, ready to get noticed by them?', image: heroImage3 },
-    { isCustom: true, image: billboardImage },
-    { title: 'Picture abhi baaki hai, mere dost.', subtitle: 'Aur tumhara breakthrough bhi.', microcopy: 'Main character arc loading... 🎬', image: heroImage2 }
+    { title: 'Confined by boundaries? Not me ', subtitle: 'Aur tumhara breakthrough bhi.', microcopy: 'Main character arc loading... 🎬', image: heroImage2 }
   ];
 
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
@@ -966,16 +966,13 @@ export default function Home() {
                 {/* CONDITIONAL RENDER: Custom Marketing Slide vs Default Slides */}
                 {slide.isCustom ? (
                   <>
-                    <span className="text-[#E92A39] text-xs md:text-sm font-black uppercase tracking-[0.3em] mb-4 block drop-shadow-sm">
-                      Marketing & Business
-                    </span>
                     <h1 className="text-4xl md:text-6xl lg:text-[72px] font-extrabold tracking-tight mb-6 leading-[1.05] text-white drop-shadow-md">
                       Duniya ke sabse bade brands <br/>
                       ke <br/>
                       <span className="text-[#E92A39]">sabse bade problems.</span>
                     </h1>
                     <p className="text-lg md:text-2xl text-white/70 italic mb-10 font-bold drop-shadow-sm">
-                      Yours to crack.
+                      Waiting for your solution.
                     </p>
                   </>
                 ) : (
