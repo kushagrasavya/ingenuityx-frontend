@@ -1522,7 +1522,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- NEW: COHORT 01 CALLOUT SECTION --- */}
+      {/* --- NEW: COHORT 01 CALLOUT SECTION - HIDDEN --- */}
+      {/* 
       <section className="py-20 px-6 md:px-12 bg-[#E92A39] text-white relative z-10 text-center">
         <div className="max-w-4xl mx-auto">
           <ScrollReveal direction="up">
@@ -1541,6 +1542,32 @@ export default function Home() {
             </a>
           </ScrollReveal>
         </div>
+      </section>
+      */}
+
+      {/* --- DUAL CTA SECTION --- */}
+      <section className="py-16 px-4 md:px-8 max-w-[1600px] mx-auto relative z-10">
+        <ScrollReveal direction="up">
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Student CTA */}
+            <div className="bg-[#2E73E6] rounded-[2.5rem] p-10 md:p-14 text-white flex flex-col justify-center items-start shadow-sm hover:shadow-lg transition-all duration-300">
+              <h3 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">Ready to prove yourself?</h3>
+              <p className="text-white/80 font-bold mb-8 max-w-md text-lg">Stop waiting for permission. Take on real-world brand challenges and build your proof-of-work.</p>
+              <button onClick={() => document.getElementById('opportunities')?.scrollIntoView({ behavior: 'smooth' })} className="bg-white text-[#2E73E6] px-8 py-4 rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform shadow-md">
+                Explore Challenges
+              </button>
+            </div>
+
+            {/* Brand CTA */}
+            <div className="bg-[#FDE25D] rounded-[2.5rem] p-10 md:p-14 text-[#111] flex flex-col justify-center items-start shadow-sm hover:shadow-lg transition-all duration-300">
+              <h3 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">Need fresh perspectives?</h3>
+              <p className="text-[#111]/70 font-bold mb-8 max-w-md text-lg">Tap into India's sharpest Gen-Z minds. Drop a challenge and discover your next superstar.</p>
+              <Link to="/contact" className="bg-[#111] text-white px-8 py-4 rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform shadow-md">
+                Partner With Us
+              </Link>
+            </div>
+          </div>
+        </ScrollReveal>
       </section>
 
       {/* MINIMAL EDITORIAL FOOTER */}
