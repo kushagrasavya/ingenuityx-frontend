@@ -4,14 +4,123 @@ import { X } from 'lucide-react';
 import { ImageWithFallback } from '../components/ImageWithFallback';
 import billboardImage from '../imports/Gemini_Generated_Image_1l2vfz1l2vfz1l2v.png';
 
+// --- MINI WIDGET: PITCH OR FLOP ---
+// Rapid-fire "boardroom" game — read the pitch, decide if it flies or dies.
+function PitchOrFlop() {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [index, setIndex] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+  const [score, setScore] = useState(0);
+  const [lastCorrect, setLastCorrect] = useState(null);
+  const [swipeDir, setSwipeDir] = useState(null);
+
+  const pitches = [
+    { t: '"Let\'s get a meme page to post our logo for free."', verdict: 'flop', r: 'Meme pages want cash upfront. "Exposure" isn\'t a currency they accept.' },
+    { t: '"What if the ad just... showed the product actually working?"', verdict: 'pitch', r: 'Wild concept. Consumers respond to honesty more than 4 dancers and a jingle.' },
+    { t: '"Let\'s hire the same celebrity every other brand in this category uses."', verdict: 'flop', r: 'Zero differentiation. You just became the 6th ad this month with the same face.' },
+    { t: '"Let\'s build the campaign around one real customer complaint."', verdict: 'pitch', r: 'Turning a real pain point into the hook = instant relatability.' },
+    { t: '"Add \'synergy\' and \'paradigm shift\' to the tagline."', verdict: 'flop', r: 'Corporate jargon has never once made a 19-year-old feel something.' },
+    { t: '"Let the community vote on the next flavor/design."', verdict: 'pitch', r: 'Co-creation = built-in launch hype and free word-of-mouth.' },
+    { t: '"Just repost the same billboard ad but on Instagram."', verdict: 'flop', r: 'Different platform, different behaviour. Billboard energy dies in a scroll feed.' },
+  ];
+
+  const handleSwipe = (dir) => {
+    const guess = dir === 'right' ? 'pitch' : 'flop';
+    const correct = guess === pitches[index].verdict;
+    setSwipeDir(dir);
+    setLastCorrect(correct);
+    setScore(s => correct ? s + 100 : Math.max(0, s - 30));
+    setTimeout(() => setRevealed(true), 200);
+  };
+
+  const nextCard = () => {
+    setRevealed(false); setLastCorrect(null); setSwipeDir(null);
+    if (index + 1 < pitches.length) { setIndex(index + 1); } else { setIsGameOver(true); }
+  };
+
+  const resetGame = () => {
+    setIsPlaying(false); setIsGameOver(false); setIndex(0); setScore(0); setRevealed(false); setLastCorrect(null); setSwipeDir(null);
+  };
+
+  return (
+    <div className="bg-[#111] border border-gray-800 rounded-[2.5rem] shadow-xl overflow-hidden text-white relative">
+      <div className="p-8 md:p-10 flex flex-col min-h-[460px]">
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h3 className="text-2xl md:text-3xl font-black tracking-tight text-white">Pitch or Flop</h3>
+            <p className="text-xs font-bold text-white/40 uppercase tracking-widest mt-1">The Boardroom Simulator</p>
+          </div>
+          {isPlaying && !isGameOver && (
+            <div className="bg-white/10 px-4 py-2 rounded-xl text-right shrink-0">
+              <p className="text-[9px] uppercase tracking-widest font-bold text-white/50">Score</p>
+              <p className="text-xl font-black text-[#FDE25D]">{score}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1 flex flex-col items-center justify-center text-center">
+          {!isPlaying ? (
+            <div className="animate-fade-in-global w-full">
+              <div className="text-5xl mb-6">🎤</div>
+              <h4 className="text-2xl font-black leading-tight mb-3">You're in the room. The idea just landed.</h4>
+              <p className="text-sm font-bold text-white/50 mb-8">Swipe right to greenlight. Swipe left to kill it.</p>
+              <button onClick={() => setIsPlaying(true)} className="bg-[#E92A39] hover:bg-[#ff3b4b] text-white px-8 py-4 rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-lg">
+                Enter the Room
+              </button>
+            </div>
+          ) : isGameOver ? (
+            <div className="animate-fade-in-global w-full flex flex-col items-center">
+              <h4 className="text-xl font-black leading-tight mb-2">Meeting Adjourned.</h4>
+              <p className="text-sm font-bold text-white/50 mb-2 uppercase tracking-widest">Final Score</p>
+              <div className="text-6xl font-black text-[#FDE25D] mb-3 tracking-tighter">{score} <span className="text-xl opacity-40">/ {pitches.length * 100}</span></div>
+              <p className="text-sm font-bold text-white/60 mb-8 max-w-xs">
+                {score >= 500 ? "You've got boardroom instincts. Go break a real brief." : "The real briefs are messier — and way more fun."}
+              </p>
+              <button onClick={resetGame} className="bg-white text-[#111] px-8 py-3.5 rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-md">
+                Run It Back
+              </button>
+            </div>
+          ) : !revealed ? (
+            <div className="animate-fade-in-global w-full">
+              <span className="text-[10px] font-black uppercase text-white/30 mb-4 block tracking-widest">Pitch {index + 1} / {pitches.length}</span>
+              <div className="bg-white/5 border border-white/10 p-8 rounded-3xl mb-8 min-h-[140px] flex items-center justify-center shadow-inner">
+                <h4 className="text-xl md:text-2xl font-black leading-tight">{pitches[index].t}</h4>
+              </div>
+              <div className="flex justify-center gap-4">
+                <button onClick={() => handleSwipe('left')} className="hover:scale-105 transition-transform bg-white/10 hover:bg-[#E92A39] border border-white/20 text-white px-7 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-md">
+                  ← Kill It
+                </button>
+                <button onClick={() => handleSwipe('right')} className="hover:scale-105 transition-transform bg-white/10 hover:bg-[#10b981] border border-white/20 text-white px-7 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-md">
+                  Greenlight →
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="animate-fade-in-global w-full flex flex-col items-center">
+              <span className={`text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 shadow-md ${lastCorrect ? 'bg-[#10b981] text-white' : 'bg-[#E92A39] text-white'}`}>
+                {lastCorrect ? '+100 · GOOD CALL' : '-30 · MISREAD THE ROOM'}
+              </span>
+              <p className="text-sm font-bold bg-white/5 border border-white/10 p-5 rounded-2xl leading-relaxed mb-8">{pitches[index].r}</p>
+              <button onClick={nextCard} className="bg-white text-[#111] px-8 py-3 rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-md">
+                {index + 1 < pitches.length ? 'Next Pitch →' : 'See Results'}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function MarketingBusiness() {
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notificationsDismissed, setNotificationsDismissed] = useState(false); // Added state to handle dismissal
+  const [notificationsDismissed, setNotificationsDismissed] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (notificationsDismissed) return; // Don't show again if they closed it
+      if (notificationsDismissed) return;
       const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = (window.scrollY / totalHeight) * 100;
       if (progress > 30) setShowNotifications(true);
@@ -21,9 +130,9 @@ export default function MarketingBusiness() {
   }, [notificationsDismissed]);
 
   const notifications = [
-    { app: 'Zomato', text: 'Your order is out for delivery', time: '2m ago', color: 'red' },
-    { app: 'Swiggy', text: 'Flash sale: 60% OFF', time: '5m ago', color: 'orange' },
-    { app: 'Blinkit', text: 'Groceries in 10 minutes', time: '8m ago', color: 'yellow' },
+    { app: 'Nuvoco', text: 'Your brief drops in 2 days', time: '2m ago', color: 'red' },
+    { app: 'SRMB', text: 'Cohort 01 applications closing soon', time: '5m ago', color: 'orange' },
+    { app: 'InGenuityX', text: 'A brand just posted a new problem', time: '8m ago', color: 'yellow' },
   ];
 
   const problems = [
@@ -32,27 +141,33 @@ export default function MarketingBusiness() {
     { e: '📱', t: '"10M downloads. Zero loyalty."' }
   ];
 
+  // Live briefs tagged for this category — same card data shape as Home.jsx
+  const liveBriefs = [
+    { title: 'Market InGenuityX. Seriously.', company: 'InGenuityX', points: 'PPO Available', deadline: 'Oct 25, 2026' },
+    { title: 'Ironclad Challenge', company: 'SRMB', points: 'Internship + ₹40,000', deadline: 'Oct 22, 2026' },
+  ];
+
+  const goToMarketingBriefs = () => navigate('/#opportunities');
+
   return (
     <div className="min-h-screen bg-[#FAFCFC] text-[#111] overflow-x-hidden font-sans selection:bg-[#E92A39] selection:text-white" data-testid="marketing-page">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
-        
         * { font-family: 'Outfit', sans-serif; }
-
         @keyframes pulse-glow {
           0%, 100% { box-shadow: 0 0 20px rgba(233, 42, 57, 0.3); }
           50% { box-shadow: 0 0 40px rgba(233, 42, 57, 0.6); }
         }
         .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
-        
         @keyframes slideInUp {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
         .animate-slide-in { animation: slideInUp 0.5s ease-out; }
+        @keyframes fadeInGlobal { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in-global { animation: fadeInGlobal 0.4s ease-out forwards; }
       `}</style>
 
-      {/* TOP NAVIGATION BUTTONS */}
       <button
         data-testid="close-btn"
         onClick={() => navigate('/')}
@@ -72,18 +187,15 @@ export default function MarketingBusiness() {
 
       {/* HERO */}
       <section className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden">
-        {/* Background Image Container (Fixed visibility) */}
         <div className="absolute inset-0 z-0">
           <ImageWithFallback 
             src={billboardImage} 
             alt="Marketing campaign billboard" 
             className="w-full h-full object-cover opacity-[0.6]" 
           />
-          {/* Subtle gradient to blend the bottom edge smoothly */}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FAFCFC]/60 to-[#FAFCFC]" />
         </div>
         
-        {/* Soft Accent Orbs */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#2E73E6]/5 rounded-full blur-3xl pointer-events-none z-0" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#E92A39]/5 rounded-full blur-3xl pointer-events-none z-0" />
 
@@ -104,35 +216,6 @@ export default function MarketingBusiness() {
           <h2 className="text-4xl md:text-6xl font-black tracking-tight text-[#111]">10M downloads.</h2>
           <h2 className="text-4xl md:text-6xl text-[#E92A39] font-black tracking-tight">Zero loyalty.</h2>
           <p className="text-sm text-gray-500 pt-6 font-bold uppercase tracking-widest">— fintech team, mildly panicking</p>
-        </div>
-      </section>
-
-      {/* VOICE NOTE */}
-      <section className="py-24 px-4">
-        <div className="max-w-4xl mx-auto space-y-12">
-          <h2 className="text-3xl md:text-5xl font-black leading-tight tracking-tight text-[#111]">
-            "Why is Gen Z buying our <span className="text-[#E92A39]">competitor's drink</span>?"
-          </h2>
-          
-          <div className="bg-white border border-gray-200 shadow-lg p-6 md:p-8 rounded-[2rem] max-w-md relative hover:-translate-y-1 transition-transform duration-300">
-            {/* Decorative arrow pointing to voice note */}
-            <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-white border-l border-b border-gray-200 rotate-45 hidden md:block"></div>
-            
-            <div className="flex items-center gap-4 mb-5">
-              <div className="w-14 h-14 bg-[#E92A39]/10 rounded-full flex items-center justify-center text-2xl drop-shadow-sm">
-                🎙️
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-gray-400 font-extrabold uppercase tracking-widest mb-1.5">Voice Note</p>
-                <div className="bg-gray-100 h-10 rounded-full flex items-center px-4 shadow-inner">
-                  <div className="w-full h-1.5 bg-gray-200 rounded-full relative overflow-hidden">
-                    <div className="absolute inset-y-0 left-0 bg-[#E92A39] w-1/3 animate-pulse rounded-full" />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <p className="text-base font-bold italic text-gray-600 pl-2">"Guys… the campaign isn't landing."</p>
-          </div>
         </div>
       </section>
 
@@ -157,6 +240,17 @@ export default function MarketingBusiness() {
             Three industries. Same chaos:{' '}
             <span className="text-[#111] font-black tracking-tight">attention is harder to earn now.</span>
           </p>
+        </div>
+      </section>
+
+      {/* PITCH OR FLOP — INTERACTIVE GAME */}
+      <section className="py-24 px-4 bg-[#FAFCFC]">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-[11px] uppercase tracking-[0.3em] text-[#E92A39] font-extrabold mb-4">Take A Break</p>
+            <h3 className="text-3xl md:text-4xl font-black tracking-tight text-[#111]">Think you've got the instincts?</h3>
+          </div>
+          <PitchOrFlop />
         </div>
       </section>
 
@@ -220,12 +314,34 @@ export default function MarketingBusiness() {
         </div>
       </section>
 
+      {/* LIVE MARKETING BRIEFS STRIP */}
+      <section className="py-24 px-4 bg-[#FFF8E7]">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-[11px] uppercase tracking-[0.3em] text-[#E92A39] font-extrabold mb-4">Right Now</p>
+            <h3 className="text-3xl md:text-4xl font-black tracking-tight text-[#111]">Live briefs in this arena</h3>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            {liveBriefs.map((b, i) => (
+              <div key={i} onClick={goToMarketingBriefs} className="bg-white border border-gray-200 rounded-[2rem] p-8 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#E92A39] mb-3">{b.company}</span>
+                <h4 className="text-xl font-black text-[#111] mb-4 tracking-tight flex-1">{b.title}</h4>
+                <div className="flex items-center justify-between text-xs font-bold text-gray-500 pt-4 border-t border-gray-100">
+                  <span>{b.points}</span>
+                  <span>{b.deadline}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
-      <section className="py-24 px-4 bg-gradient-to-b from-[#FAFCFC] to-[#FFF8E7] relative overflow-hidden">
+      <section className="py-24 px-4 bg-gradient-to-b from-[#FFF8E7] to-[#FAFCFC] relative overflow-hidden">
         <div className="text-center max-w-2xl mx-auto relative z-10">
           <button
             data-testid="cta-primary"
-            onClick={() => navigate('/')}
+            onClick={goToMarketingBriefs}
             className="bg-[#E92A39] hover:bg-[#ff3b4b] text-white text-xl md:text-2xl px-12 py-6 rounded-full transition-all hover:-translate-y-1 shadow-md pulse-glow font-black tracking-tight"
           >
             Take the brief. Break it open. →

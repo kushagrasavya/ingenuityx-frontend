@@ -2,14 +2,18 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
-// --- ENVIRONMENT VARIABLE SETUP ---
+import nuvocoLogo from '../imports/logo_nuvoco.jpg';
+import srmbLogo from '../imports/srmb.jpg';
+import ingenxLogo from '../imports/ingenx.png';
+import trootechLogo from '../imports/trootech.png';
+
 const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:1337';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    type: 'Student', // Default selected
+    type: 'Student',
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,7 +24,6 @@ export default function Contact() {
     setIsSubmitting(true);
     
     try {
-      // FIXED: Uses API_URL variable instead of localhost
       await axios.post(`${API_URL}/api/contacts`, {
         data: {
           name: formData.name,
@@ -32,11 +35,7 @@ export default function Contact() {
 
       setIsSubmitting(false);
       setIsSuccess(true);
-      
-      // Clear the form
       setFormData({ name: '', email: '', type: 'Student', message: '' });
-      
-      // Reset success message after 5 seconds
       setTimeout(() => setIsSuccess(false), 5000);
 
     } catch (error) {
@@ -51,14 +50,11 @@ export default function Contact() {
       
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
-        
         * { font-family: 'Outfit', sans-serif; }
-
         @keyframes fadeInGlobal { from { opacity: 0; } to { opacity: 1; } }
         .animate-fade-in-global { animation: fadeInGlobal 0.5s ease-out forwards; }
       `}</style>
 
-      {/* NAVBAR BACK ARROW (Minimalist) */}
       <nav className="w-full px-6 py-8 md:px-12 flex items-center justify-between">
         <Link to="/" className="text-sm font-extrabold tracking-widest uppercase hover:text-[#E92A39] transition-colors flex items-center gap-2">
           ← Back to Home
@@ -67,10 +63,23 @@ export default function Contact() {
       </nav>
 
       <main className="max-w-[1200px] mx-auto px-6 md:px-12 mt-8">
+
+        {/* LOGO STRIP */}
+        <div className="mb-16 flex flex-col md:flex-row items-center justify-center md:justify-between gap-6 bg-white border border-gray-200 rounded-[2rem] py-6 px-8 shadow-sm">
+          <p className="text-xs font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center md:text-left">
+            Trusted by these teams
+          </p>
+          <div className="flex items-center justify-center gap-8 md:gap-12 flex-wrap">
+            <img src={nuvocoLogo} alt="Nuvoco" className="h-7 md:h-8 object-contain" />
+            <img src={srmbLogo} alt="SRMB" className="h-7 md:h-8 object-contain" />
+            <img src={trootechLogo} alt="TrooTech" className="h-7 md:h-8 object-contain" />
+            <img src={ingenxLogo} alt="InGenuityX" className="h-7 md:h-8 object-contain" />
+          </div>
+        </div>
         
         <div className="grid md:grid-cols-2 gap-12 lg:gap-24 items-start">
           
-          {/* LEFT COLUMN: COPY & INFO */}
+          {/* LEFT COLUMN — copy cut down, no paragraph before the form */}
           <div className="space-y-12">
             <div>
               <span className="text-[#E92A39] text-xs font-black uppercase tracking-[0.25em] mb-6 block">Hit us up</span>
@@ -78,22 +87,22 @@ export default function Contact() {
                 Skip the formalities. <br/>
                 <span className="text-gray-400">Let's talk.</span>
               </h1>
-              <p className="text-lg md:text-xl font-bold text-gray-600 leading-relaxed max-w-md">
-                No automated "we value your email" auto-replies. Whether you're a student with a question or a brand ready to drop a brief, a real human will read this.
-              </p>
+              <span className="inline-block text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/20">
+                Avg. reply time: 4 hrs, not 4 weeks
+              </span>
             </div>
 
-            <div className="space-y-8">
-              <div className="bg-white border border-gray-200 p-8 rounded-[2rem] shadow-sm flex flex-col items-start hover:border-[#3BA8E7] transition-colors">
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-2">Direct Line</span>
-                <a href="mailto:storm@minervainnov.com" className="text-2xl font-black text-[#111] hover:text-[#3BA8E7] transition-colors">
+            <div className="space-y-6">
+              <div className="bg-[#2E73E6] text-white p-8 rounded-[2rem] shadow-sm flex flex-col items-start hover:shadow-md transition-shadow">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-white/70 mb-2">Direct Line</span>
+                <a href="mailto:storm@minervainnov.com" className="text-2xl font-black text-white hover:text-[#FDE25D] transition-colors">
                   storm@minervainnov.com
                 </a>
               </div>
               
-              <div className="bg-white border border-gray-200 p-8 rounded-[2rem] shadow-sm flex flex-col items-start hover:border-[#FB607E] transition-colors">
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-2">Call Us Maybe</span>
-                <a href="tel:+918320262013" className="text-2xl font-black text-[#111] hover:text-[#FB607E] transition-colors">
+              <div className="bg-[#111] text-white p-8 rounded-[2rem] shadow-sm flex flex-col items-start hover:shadow-md transition-shadow">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-white/50 mb-2">Call Us Maybe</span>
+                <a href="tel:+918320262013" className="text-2xl font-black text-white hover:text-[#FB607E] transition-colors">
                   +91 8320 262 013
                 </a>
               </div>
@@ -103,12 +112,10 @@ export default function Contact() {
           {/* RIGHT COLUMN: THE FORM */}
           <div className="bg-white border border-gray-200 p-8 md:p-10 rounded-[3rem] shadow-xl relative overflow-hidden">
             
-            {/* SUCCESS OVERLAY */}
             {isSuccess && (
               <div className="absolute inset-0 bg-[#FAFCFC] z-20 flex flex-col items-center justify-center text-center p-8 animate-fade-in">
-                <div className="text-6xl mb-6">✌️</div>
-                <h3 className="text-3xl font-black tracking-tight mb-2">Message received.</h3>
-                <p className="text-gray-600 font-bold">We'll get back to you faster than HR reads a resume.</p>
+                <div className="text-6xl mb-6">✅</div>
+                <h3 className="text-3xl font-black tracking-tight">Message received.</h3>
               </div>
             )}
 

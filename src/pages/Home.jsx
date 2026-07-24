@@ -30,7 +30,6 @@ import ingenxPosterBg from '../imports/IngenX (2).png';
 import evereadyBg from '../imports/eveready.png';
 
 // --- NEW SLIDER IMAGES ---
-
 import sliderImg6 from '../imports/image (6).png';
 import sliderImg7 from '../imports/image (7).png';
 import sliderImg8 from '../imports/image (8).png';
@@ -102,8 +101,8 @@ function AuraCalculator() {
 
   return (
     <div className="bg-[#FDE25D] border border-gray-200 p-6 md:p-8 rounded-[2rem] shadow-sm flex flex-col h-[400px] relative overflow-hidden group hover:shadow-md transition-all">
-      <h3 className="text-2xl font-black tracking-tight mb-1 text-[#111] flex items-center gap-2">🔮 Aura Calculator</h3>
-      <p className="text-xs font-bold text-[#111]/60 uppercase tracking-widest mb-6">Mini-Game</p>
+      <h3 className="text-2xl font-black tracking-tight mb-1 text-[#111] flex items-center gap-2">Aura Calculator</h3>
+      <p className="text-xs font-bold text-[#111]/60 uppercase tracking-widest mb-6"></p>
       {!isPlaying ? (
         <div className="flex-1 flex flex-col items-center justify-center text-center animate-fade-in-global">
           <div className="text-5xl mb-4 drop-shadow-sm">💼</div>
@@ -183,8 +182,8 @@ function FlagGame() {
     <div className={`${bgColor} border border-gray-200 p-6 md:p-8 rounded-[2rem] shadow-sm flex flex-col h-[400px] text-white relative group transition-colors duration-500 hover:shadow-md`}>
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-2xl font-black tracking-tight mb-1 text-white flex items-center gap-2">Scanner</h3>
-          <p className="text-xs font-bold text-white/60 uppercase tracking-widest">Guess to Score</p>
+          <h3 className="text-2xl font-black tracking-tight mb-1 text-white flex items-center gap-2">Red Flag or Green FLag</h3>
+          <p className="text-xs font-bold text-white/60 uppercase tracking-widest"></p>
         </div>
         {isPlaying && !isGameOver && (
           <div className="bg-white/20 px-4 py-2 rounded-xl text-right animate-fade-in-global">
@@ -303,7 +302,7 @@ function WhackAYapper() {
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="text-2xl font-black tracking-tight mb-1 text-white flex items-center gap-2 relative z-20">Whack-A-Yapper</h3>
-          <p className="text-xs font-bold text-white/60 uppercase tracking-widest relative z-20">Reaction Game</p>
+          <p className="text-xs font-bold text-white/60 uppercase tracking-widest relative z-20"></p>
         </div>
         {isPlaying && !isGameOver && (
           <div className="bg-white/20 px-3 py-1.5 rounded-xl text-right animate-fade-in-global flex gap-4">
@@ -1385,70 +1384,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CAMPUS TO BOARDROOM - MINIATURIZED HORIZONTAL TIMELINE - HIDDEN VIA COMMENTS */}
-      {/* 
-      <section className="py-24 px-4 md:px-8 relative border-t border-gray-200 overflow-hidden z-10 bg-white" data-testid="campus-section">
-        <div className="max-w-[1600px] mx-auto relative z-10">
-          <ScrollReveal direction="up">
-            <div className="text-center mb-16 max-w-3xl mx-auto relative">
-              <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 text-black">Campus Se Boardroom Tak</h2>
-              <p className="text-xl text-gray-600 font-bold leading-relaxed">We killed the 11-step corporate maze. Here are the 4 defining moments between you and the executives.</p>
-              
-              <div className="hidden md:flex justify-center gap-4 mt-8">
-                <button onClick={() => scrollTrack(timelineScrollRef, 'left')} className="w-12 h-12 rounded-full border border-gray-200 bg-white flex items-center justify-center font-black text-gray-600 hover:text-black hover:bg-gray-50 transition-all shadow-sm active:scale-95 text-lg">←</button>
-                <button onClick={() => scrollTrack(timelineScrollRef, 'right')} className="w-12 h-12 rounded-full border border-gray-200 bg-white flex items-center justify-center font-black text-gray-600 hover:text-black hover:bg-gray-50 transition-all shadow-sm active:scale-95 text-lg">→</button>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          <div className="relative w-full overflow-hidden">
-            <div className="absolute top-[26px] left-0 w-[200%] h-1 bg-gradient-to-r from-[#2E73E6] via-[#FB607E] to-[#FDE25D] hidden md:block z-0"></div>
-
-            <div 
-              ref={timelineScrollRef}
-              className="flex flex-col md:flex-row overflow-x-auto hide-scrollbar gap-4 pb-12 snap-x px-2 relative z-10 items-stretch justify-center"
-            >
-              
-              <div className="absolute top-0 bottom-0 left-[26px] w-1 bg-gradient-to-b from-[#2E73E6] via-[#FB607E] to-[#FDE25D] md:hidden z-0"></div>
-
-              {steps.map((step, index) => {
-                const currentStyle = stepColors[index % stepColors.length];
-                
-                return (
-                  <div key={index} className="relative flex flex-col min-w-full sm:min-w-[200px] md:min-w-[220px] lg:min-w-[250px] shrink-0 snap-center group pl-12 md:pl-0 pt-0 md:pt-4 mb-6 md:mb-0">
-                    
-                    <div className="absolute left-[16px] md:left-1/2 top-4 md:top-[0px] w-5 h-5 rounded-full border-4 border-[#FAFCFC] bg-[#111] -translate-x-1/2 md:translate-y-0 z-10 group-hover:scale-125 transition-transform duration-300 shadow-sm"></div>
-
-                    <ScrollReveal direction="up" delay={index * 50} className="flex-1 flex flex-col mt-2 md:mt-6 h-full">
-                      <div className={`${currentStyle} border p-4 rounded-2xl hover:shadow-lg transition-all duration-300 flex-1 flex flex-col bg-white/60 backdrop-blur-md`}>
-                        <span className="text-[#111] font-black text-[10px] uppercase tracking-[0.2em] mb-2 block opacity-50">Step 0{step.number}</span>
-                        <h3 className="text-base font-black tracking-tight mb-2 text-black leading-tight">{step.title}</h3>
-                        <p className="text-gray-800 mb-3 italic text-xs font-semibold">"{step.quote.replace(/"/g, '')}"</p>
-                        {step.description && <p className="text-gray-700 text-[10px] leading-relaxed mb-4 font-medium">{step.description}</p>}
-                        
-                        {step.didYouKnow && (
-                          <div className="bg-white/80 border border-white/40 p-3 rounded-xl mt-auto shadow-sm">
-                            <p className="text-[10px] text-gray-800 leading-relaxed font-bold">💡 {step.didYouKnow}</p>
-                          </div>
-                        )}
-                        
-                        {step.image && (
-                          <div className="mt-4 overflow-hidden rounded-xl shadow-sm border border-white/50 mt-auto">
-                            <ImageWithFallback src={step.image} alt={step.title} className="w-full object-cover group-hover:scale-105 transition-transform duration-500" style={{ aspectRatio: '16/9' }} />
-                          </div>
-                        )}
-                      </div>
-                    </ScrollReveal>
-
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
-      */}
-
       {/* HR INTERVIEW AURA GUIDE */}
       <section className="py-32 px-4 md:px-8 overflow-hidden relative z-10 bg-[#FFF8E5]" data-testid="hr-section">
         <div className="max-w-[1600px] mx-auto relative z-10">
@@ -1521,29 +1456,6 @@ export default function Home() {
           </ScrollReveal>
         </div>
       </section>
-
-      {/* --- NEW: COHORT 01 CALLOUT SECTION - HIDDEN --- */}
-      {/* 
-      <section className="py-20 px-6 md:px-12 bg-[#E92A39] text-white relative z-10 text-center">
-        <div className="max-w-4xl mx-auto">
-          <ScrollReveal direction="up">
-            <h2 className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] mb-4 text-white/70">Pre-Launch Activation</h2>
-            <h3 className="text-4xl md:text-6xl font-black tracking-tight mb-6">Become a Founding Voice.</h3>
-            <p className="text-lg font-bold mb-10 text-white/90 max-w-2xl mx-auto leading-relaxed">
-              We are recruiting 10 students to form Campus Champion Cohort 01. You get first access to briefs, a direct line to the founders, and your name in the launch issue.
-            </p>
-            <a 
-              href="https://typeform.com" 
-              target="_blank" 
-              rel="noreferrer"
-              className="inline-block bg-white text-[#E92A39] px-8 py-4 rounded-xl font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-xl text-sm"
-            >
-              Apply for Cohort 01
-            </a>
-          </ScrollReveal>
-        </div>
-      </section>
-      */}
 
       {/* --- DUAL CTA SECTION --- */}
       <section className="py-16 px-4 md:px-8 max-w-[1600px] mx-auto relative z-10">
