@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import logoImage from '../imports/ingenuityx-logo.png';
+import logoImage from '../imports/ingenuityx-logo.svg';
 
 // --- LOCAL LOGOS ---
 import nuvocoLogo from '../imports/logo_nuvoco.jpg';

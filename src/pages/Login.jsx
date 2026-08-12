@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import logoImage from '../imports/ingenuityx-logo.png'; 
+import logoImage from '../imports/ingenuityx-logo.svg'; 
 
 // --- ENVIRONMENT VARIABLE SETUP ---
 const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:1337';

@@ -2,47 +2,74 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ImageWithFallback } from '../components/ImageWithFallback';
-import { Search } from 'lucide-react';
+import { Search, Lock, CheckCircle2, ChevronRight, Clock, Award, Upload, Scale, FileText, TrendingUp, MessageCircle, Mic, Terminal } from 'lucide-react';
 
-import heroImage2 from '../imports/image-4.png';
-import heroImage3 from '../imports/image-5.png';
-import registeredImage from '../imports/image-1.png';
-import groupDiscussion from '../imports/image-3.png';
-import certificateImage from '../imports/image-6.png';
-import logoImage from '../imports/ingenuityx-logo.png';
+// --- MEDIA IMPORTS ---
 import billboardImage from '../imports/Gemini_Generated_Image_1l2vfz1l2vfz1l2v.png';
+import logoImage from '../imports/ingenuityx-logo.svg';
 
-// --- LOCAL LOGOS & IMAGES ---
+// --- LOCAL LOGOS ---
 import nuvocoLogo from '../imports/logo_nuvoco.jpg';
 import srmbLogo from '../imports/srmb.jpg';
-import ingenxLogo from '../imports/ingenx.png';        
-import trootechLogo from '../imports/trootech.png';   
-import colgateBg from '../imports/SmileBright.png'; 
+import ingenxLogo from '../imports/ingenx.png';
+import trootechLogo from '../imports/trootech.png';
 
-// --- NEW POSTER UPLOADS ---
+// --- POSTER IMAGES ---
 import legrandBg from '../imports/legrand.png';
 import nuvocoGreenBg from '../imports/nuvoco (1).png';
-import srmbShiftBg from '../imports/nuvoco.png'; 
+import srmbShiftBg from '../imports/nuvoco.png';
 import srmbGreenProBg from '../imports/srmb (1).png';
 import srmbIroncladBg from '../imports/srmb.png';
 import trootechPosterBg from '../imports/Trootech (2).png';
 import ingenxPosterBg from '../imports/IngenX (2).png';
 import evereadyBg from '../imports/eveready.png';
 
-// --- NEW SLIDER IMAGES ---
-import sliderImg6 from '../imports/image (6).png';
-import sliderImg7 from '../imports/image (7).png';
-import sliderImg8 from '../imports/image (8).png';
-import sliderImg10 from '../imports/image (10).png';
-import sliderImg11 from '../imports/image (11).png';
+// --- HERO VIDEOS ---
+import travel from '../imports/travel.mp4';
+import intervie from '../imports/intervie.mp4';
+import preparation2 from '../imports/preparation2.mp4';
+import pizza from '../imports/pizza.mp4';
+import prep from '../imports/prep.mp4';
+import chaos from '../imports/chaos.mp4';
+import celebration4 from '../imports/celebration4.mp4';
+import celebration3 from '../imports/celebration3.mp4';
 
-// --- ENVIRONMENT VARIABLE SETUP ---
+import img6 from '../imports/img6.jpg';
+import img7 from '../imports/img7.png';
+
+// =====================================================================
+// ENVIRONMENT & CONSTANTS
+// =====================================================================
 const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:1337';
-
-// --- PLACEHOLDER BACKGROUND ---
 const PLACEHOLDER_BG = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop";
+const GLOBAL_BG = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2560&auto=format&fit=crop"; 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// --- CUSTOM SCROLL REVEAL COMPONENT ---
+const CATEGORY_COLORS = {
+  Marketing: '#E92A39',
+  Tech: '#2E73E6',
+  Design: '#A855F7',
+  Sustainability: '#10B981',
+  Innovation: '#F59E0B',
+};
+
+const CATEGORY_DATA = {
+  Marketing: { img: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=800&auto=format&fit=crop', desc: 'Brand strategy, GTM, research, and positioning.' },
+  Tech: { img: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop', desc: 'Hackathons, coding challenges, AI, and systems.' },
+  Design: { img: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=800&auto=format&fit=crop', desc: 'UI/UX, product design, branding, and aesthetics.' },
+  Sustainability: { img: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=800&auto=format&fit=crop', desc: 'Green tech, decarbonisation, and eco-innovation.' },
+  Innovation: { img: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=800&auto=format&fit=crop', desc: 'Open-ended problem solving and lateral thinking.' }
+};
+
+// --- REWARD IMAGES (For Section 4 Cards) ---
+const REWARD_IMAGES = [
+  "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800&auto=format&fit=crop", 
+  "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&auto=format&fit=crop", 
+  img6, 
+  "https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=800&auto=format&fit=crop"  
+];
+
+// --- SCROLL REVEAL ---
 function ScrollReveal({ children, direction = "up", delay = 0, width = "100%", className = "" }) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef(null);
@@ -53,24 +80,22 @@ function ScrollReveal({ children, direction = "up", delay = 0, width = "100%", c
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          observer.unobserve(entry.target); 
+          observer.unobserve(entry.target);
         }
       },
       { threshold: 0.15, rootMargin: "0px 0px -50px 0px" }
     );
     if (currentRef) observer.observe(currentRef);
-    return () => {
-      if (currentRef) observer.unobserve(currentRef);
-    };
+    return () => { if (currentRef) observer.unobserve(currentRef); };
   }, []);
 
   let dirClass = "";
   if (!isVisible) {
-    if (direction === "up") dirClass = "translate-y-16 opacity-0";
-    if (direction === "down") dirClass = "-translate-y-16 opacity-0";
-    if (direction === "left") dirClass = "-translate-x-16 opacity-0";
-    if (direction === "right") dirClass = "translate-x-16 opacity-0";
-    if (direction === "scale") dirClass = "scale-90 opacity-0";
+    if (direction === "up") dirClass = "translate-y-8 md:translate-y-12 opacity-0";
+    if (direction === "down") dirClass = "-translate-y-8 md:-translate-y-12 opacity-0";
+    if (direction === "left") dirClass = "-translate-x-8 md:-translate-x-12 opacity-0";
+    if (direction === "right") dirClass = "translate-x-8 md:translate-x-12 opacity-0";
+    if (direction === "scale") dirClass = "scale-95 opacity-0";
   } else {
     dirClass = "translate-y-0 translate-x-0 scale-100 opacity-100";
   }
@@ -82,332 +107,63 @@ function ScrollReveal({ children, direction = "up", delay = 0, width = "100%", c
   );
 }
 
-// --- MINI WIDGET 1: AURA CALCULATOR ---
-function AuraCalculator() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [step, setStep] = useState(0);
-  const [score, setScore] = useState(0);
-  
-  const questions = [
-    { q: "HR asks: 'Where do you see yourself in 5 years?'", opts: [{ t: "Taking your job.", s: 5000 }, { t: "On a beach, unbothered.", s: 1000 }, { t: "Synergizing core deliverables.", s: -1000 }] },
-    { q: "Your manager denies your PTO request. Your move:", opts: [{ t: "'Okay noted' (cries)", s: -500 }, { t: "It wasn't a request. It was a heads-up.", s: 5000 }, { t: "Call in sick that day anyway.", s: 500 }] },
-    { q: "Colleague says 'Let's circle back offline'. Translation?", opts: [{ t: "We are never speaking of this again.", s: 500 }, { t: "I need to schedule a 1:1 meeting.", s: -1000 }, { t: "They hate me.", s: 0 }] }
-  ];
-
-  const handleAnswer = (points) => {
-    setScore(score + points);
-    setStep(step + 1);
-  };
-
+// --- FAQ ACCORDION ITEM ---
+function FaqItem({ q, a, isOpen, onClick }) {
   return (
-    <div className="bg-[#FDE25D] border border-gray-200 p-6 md:p-8 rounded-[2rem] shadow-sm flex flex-col h-[400px] relative overflow-hidden group hover:shadow-md transition-all">
-      <h3 className="text-2xl font-black tracking-tight mb-1 text-[#111] flex items-center gap-2">Aura Calculator</h3>
-      <p className="text-xs font-bold text-[#111]/60 uppercase tracking-widest mb-6"></p>
-      {!isPlaying ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-center animate-fade-in-global">
-          <div className="text-5xl mb-4 drop-shadow-sm">💼</div>
-          <h4 className="text-xl font-black leading-tight mb-3 text-[#111]">Discover your corporate vibe.</h4>
-          <p className="text-sm font-bold text-[#111]/60 mb-6">Are you a CEO or an NPC?</p>
-          <button onClick={() => setIsPlaying(true)} className="bg-white text-[#111] px-8 py-3.5 rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-md">
-            Start Quiz
-          </button>
-        </div>
-      ) : step < questions.length ? (
-        <div className="flex-1 flex flex-col justify-center animate-fade-in-global">
-          <span className="text-[10px] font-black uppercase text-[#E92A39] mb-2 tracking-widest">Question {step + 1} / {questions.length}</span>
-          <h4 className="text-xl font-black leading-tight mb-5 text-[#111]">{questions[step].q}</h4>
-          <div className="space-y-3">
-            {questions[step].opts.map((opt, i) => (
-              <button key={i} onClick={() => handleAnswer(opt.s)} className="w-full text-left bg-white/60 hover:bg-white text-sm font-bold text-[#111] px-5 py-3.5 rounded-xl transition-all hover:scale-[1.02] hover:shadow-sm">
-                {opt.t}
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="flex-1 flex flex-col items-center justify-center text-center animate-fade-in-global">
-          <p className="text-sm font-bold text-gray-700 mb-2">Final Aura Score</p>
-          <div className="text-6xl font-black text-[#111] mb-4 tracking-tighter">{score > 0 ? `+${score}` : score}</div>
-          <p className="text-sm font-bold leading-relaxed text-[#111] bg-white/50 p-4 rounded-xl border border-white shadow-sm">
-            {score >= 5000 ? "Sigma Energy. You are the CEO now." : score > 0 ? "You will survive the corporate machine." : "Negative Aura. Confirmed Corporate NPC."}
-          </p>
-          <button onClick={() => { setIsPlaying(false); setStep(0); setScore(0); }} className="mt-6 text-[10px] font-black uppercase tracking-widest text-[#111] bg-white px-5 py-2.5 rounded-full hover:scale-105 transition-transform shadow-sm">Play Again</button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// --- MINI WIDGET 2: FLAG GAME ---
-function FlagGame() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isGameOver, setIsGameOver] = useState(false);
-  const [index, setIndex] = useState(0);
-  const [revealed, setRevealed] = useState(false);
-  const [score, setScore] = useState(0);
-  const [lastGuessCorrect, setLastGuessCorrect] = useState(null);
-  
-  const cards = [
-    { t: "Looking for a rockstar ninja who wears many hats.", flag: "red", r: "Translation: You will do the job of 3 different people for the salary of one intern." },
-    { t: "We actively encourage taking your PTO.", flag: "green", r: "Translation: Rare W. They don't want you burning out and crying in the office bathroom." },
-    { t: "Salary is based on experience and passion.", flag: "red", r: "Translation: They pay in 'exposure' and occasional office pizza. Run." },
-    { t: "We play hard, but we work even harder.", flag: "red", r: "Translation: You will be online at 11 PM on a Friday. The 'play' is a ping-pong table nobody uses." },
-    { t: "We care about output, not hours logged.", flag: "green", r: "Translation: Massive Green Flag. No clock-watching or policing your active status on Slack." },
-    { t: "You'll have the opportunity to define your own role.", flag: "red", r: "Translation: We have zero strategy or onboarding plan. Good luck figuring it out." },
-    { t: "Salary range is listed directly in the Job Description.", flag: "green", r: "Translation: W company. No wasting 4 interview rounds just to find out it pays peanuts." },
-    { t: "Please complete this 20-page assignment before the first round.", flag: "red", r: "Translation: They are crowdsourcing free labor to solve their actual client problems." },
-    { t: "We're like a family here.", flag: "red", r: "Translation: We have zero boundaries, no HR department, and high emotional manipulation." },
-    { t: "Junior ideas are actively tested and funded here.", flag: "green", r: "Translation: Green flag! You won't just be fetching coffee; your brain will actually be used." }
-  ];
-
-  const handleGuess = (guess) => {
-    const isCorrect = guess === cards[index].flag;
-    setLastGuessCorrect(isCorrect);
-    if (isCorrect) { setScore(s => s + 100); } else { setScore(s => Math.max(0, s - 50)); }
-    setRevealed(true);
-  };
-
-  const nextCard = () => { 
-    setRevealed(false); setLastGuessCorrect(null);
-    if (index + 1 < cards.length) { setIndex(index + 1); } else { setIsGameOver(true); }
-  };
-
-  const resetGame = () => {
-    setIsPlaying(false); setIsGameOver(false); setIndex(0); setScore(0); setRevealed(false); setLastGuessCorrect(null);
-  };
-
-  const bgColor = !isPlaying || !revealed || isGameOver ? 'bg-[#111]' : (cards[index].flag === 'red' ? 'bg-[#E92A39]' : 'bg-[#10b981]');
-
-  return (
-    <div className={`${bgColor} border border-gray-200 p-6 md:p-8 rounded-[2rem] shadow-sm flex flex-col h-[400px] text-white relative group transition-colors duration-500 hover:shadow-md`}>
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-2xl font-black tracking-tight mb-1 text-white flex items-center gap-2">Red Flag or Green FLag</h3>
-          <p className="text-xs font-bold text-white/60 uppercase tracking-widest"></p>
-        </div>
-        {isPlaying && !isGameOver && (
-          <div className="bg-white/20 px-4 py-2 rounded-xl text-right animate-fade-in-global">
-            <p className="text-[9px] uppercase tracking-widest font-bold text-white/70">Score</p>
-            <p className="text-xl font-black">{score}</p>
-          </div>
-        )}
-      </div>
-      <div className="flex-1 flex flex-col items-center justify-center text-center relative">
-        {!isPlaying ? (
-          <div className="animate-fade-in-global w-full">
-            <h4 className="text-xl font-black leading-tight mb-3 text-white">Can you spot the red flags?</h4>
-            <p className="text-sm font-bold text-white/60 mb-6">Swipe on corporate jargon.</p>
-            <button onClick={() => setIsPlaying(true)} className="bg-white text-[#111] px-8 py-3.5 rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-md">Start Scanning</button>
-          </div>
-        ) : isGameOver ? (
-          <div className="animate-fade-in-global w-full flex flex-col items-center">
-            <h4 className="text-xl font-black leading-tight mb-3 text-white">Game Over</h4>
-            <p className="text-sm font-bold text-white/60 mb-2">Final Score</p>
-            <div className="text-6xl font-black text-white mb-6 tracking-tighter">{score} <span className="text-2xl opacity-50">/ 1000</span></div>
-            <button onClick={resetGame} className="bg-white text-[#111] px-8 py-3.5 rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-md">Play Again</button>
-          </div>
-        ) : !revealed ? (
-          <div className="animate-fade-in-global w-full">
-            <span className="text-[10px] font-black uppercase text-white/50 mb-3 block tracking-widest">Card {index + 1} / {cards.length}</span>
-            <div className="bg-white/10 p-6 rounded-2xl mb-6 backdrop-blur-sm min-h-[120px] flex items-center justify-center border border-white/20 shadow-inner">
-              <h4 className="text-xl font-black leading-tight">"{cards[index].t}"</h4>
-            </div>
-            <div className="flex justify-center gap-4">
-              <button onClick={() => handleGuess('red')} className="hover:scale-105 transition-transform bg-[#E92A39] text-white px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-md border border-white/20">Red Flag</button>
-              <button onClick={() => handleGuess('green')} className="hover:scale-105 transition-transform bg-[#10b981] text-white px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-md border border-white/20">Green Flag</button>
-            </div>
-          </div>
-        ) : (
-          <div className="animate-fade-in-global w-full flex flex-col items-center">
-            {lastGuessCorrect ? (
-              <span className="text-[10px] font-black uppercase tracking-widest bg-white text-black px-3 py-1 rounded-full mb-3 shadow-md">+100 CORRECT</span>
-            ) : (
-              <span className="text-[10px] font-black uppercase tracking-widest bg-black text-white px-3 py-1 rounded-full mb-3 shadow-md">-50 WRONG</span>
-            )}
-            <p className="text-sm font-bold bg-black/20 p-5 rounded-xl leading-relaxed mb-6 border border-white/10 shadow-inner">{cards[index].r}</p>
-            <button onClick={nextCard} className="bg-white text-black px-8 py-3 rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-md">
-              {index + 1 < cards.length ? 'Next Phrase →' : 'See Results'}
-            </button>
-          </div>
-        )}
+    <div className="border-b border-[#2A2A2E] last:border-0">
+      <button onClick={onClick} className="w-full flex items-center justify-between py-5 md:py-6 text-left group">
+        <span className="text-base md:text-xl font-bold text-[#FAFAFA] pr-4 md:pr-6 group-hover:text-[#E92A39] transition-colors">{q}</span>
+        <span className={`text-[#E92A39] text-xl md:text-2xl transition-transform duration-300 shrink-0 ${isOpen ? 'rotate-45' : '+'}`}>+</span>
+      </button>
+      <div className={`overflow-hidden transition-all duration-300 ease-out ${isOpen ? 'max-h-[500px] pb-5 md:pb-6' : 'max-h-0'}`}>
+        <p className="text-[#A1A1AA] text-sm md:text-base font-semibold leading-relaxed pr-6 md:pr-10">{a}</p>
       </div>
     </div>
   );
 }
 
-// --- MINI WIDGET 3: WHACK-A-YAPPER ---
-function WhackAYapper() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isGameOver, setIsGameOver] = useState(false);
-  const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(15);
-  const [moles, setMoles] = useState(Array(9).fill(null));
-
-  useEffect(() => {
-    let moleTimer;
-    let countdownTimer;
-
-    if (isPlaying && !isGameOver) {
-      moleTimer = setInterval(() => {
-        setMoles(prev => {
-          const newMoles = [...prev];
-          for(let i = 0; i < 9; i++) { if (Math.random() > 0.4) newMoles[i] = null; }
-          const emptyIndices = newMoles.map((v, i) => v === null ? i : null).filter(v => v !== null);
-          
-          if (emptyIndices.length > 0) {
-            const numToAdd = Math.floor(Math.random() * 2) + 1;
-            for(let i = 0; i < numToAdd; i++) {
-              if (emptyIndices.length === 0) break;
-              const randIdx = Math.floor(Math.random() * emptyIndices.length);
-              const gridIdx = emptyIndices[randIdx];
-              emptyIndices.splice(randIdx, 1);
-
-              const isGreen = Math.random() > 0.8;
-              if (isGreen) {
-                const goodWords = ["PPO", "Raise", "Paid Leave", "Bonus"];
-                newMoles[gridIdx] = { type: 'green', text: goodWords[Math.floor(Math.random() * goodWords.length)] };
-              } else {
-                const toxicWords = ["Synergy", "Plz Fix", "ASAP", "Bandwidth", "Circle Back"];
-                newMoles[gridIdx] = { type: 'red', text: toxicWords[Math.floor(Math.random() * toxicWords.length)] };
-              }
-            }
-          }
-          return newMoles;
-        });
-      }, 700);
-
-      countdownTimer = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) { setIsGameOver(true); return 0; }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => { clearInterval(moleTimer); clearInterval(countdownTimer); };
-  }, [isPlaying, isGameOver]);
-
-  const whack = (index) => {
-    const mole = moles[index];
-    if (!mole) return;
-    if (mole.type === 'red') { setScore(s => s + 10); } else { setScore(s => Math.max(0, s - 50)); }
-    setMoles(prev => { const newMoles = [...prev]; newMoles[index] = null; return newMoles; });
-  };
-
-  const startGame = () => {
-    setIsPlaying(true); setIsGameOver(false); setScore(0); setTimeLeft(15); setMoles(Array(9).fill(null));
-  };
-
+// --- PINNED CARD (proof wall artifact wrapper) ---
+function PinnedCard({ rotate = 0, className = '', children }) {
   return (
-    <div className="bg-[#2E73E6] border border-gray-200 p-6 md:p-8 rounded-[2rem] shadow-sm flex flex-col h-[400px] text-white relative overflow-hidden group hover:shadow-md transition-all">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-2xl font-black tracking-tight mb-1 text-white flex items-center gap-2 relative z-20">Whack-A-Yapper</h3>
-          <p className="text-xs font-bold text-white/60 uppercase tracking-widest relative z-20"></p>
-        </div>
-        {isPlaying && !isGameOver && (
-          <div className="bg-white/20 px-3 py-1.5 rounded-xl text-right animate-fade-in-global flex gap-4">
-            <div>
-              <p className="text-[8px] uppercase tracking-widest font-bold text-white/70">Time</p>
-              <p className="text-lg font-black">{timeLeft}s</p>
-            </div>
-            <div>
-              <p className="text-[8px] uppercase tracking-widest font-bold text-white/70">Score</p>
-              <p className="text-lg font-black">{score}</p>
-            </div>
-          </div>
-        )}
-      </div>
-      
-      {!isPlaying ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-center animate-fade-in-global z-20">
-          <h4 className="text-xl font-black leading-tight mb-3 text-white">Smash the toxic jargon.</h4>
-          <p className="text-sm font-bold text-white/60 mb-6 px-4">Hit the Red bubbles. <br/> Avoid the Green flags!</p>
-          <button onClick={startGame} className="bg-white text-[#2E73E6] px-8 py-3.5 rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-md">
-            Start Game
-          </button>
-        </div>
-      ) : isGameOver ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-center animate-fade-in-global z-20">
-          <h4 className="text-3xl font-black mb-3">Time's Up!</h4>
-          <p className="text-sm font-bold text-white/80 mb-2 uppercase tracking-widest">Final Score</p>
-          <div className="text-6xl font-black text-white mb-8 tracking-tighter">{score}</div>
-          <button onClick={() => setIsPlaying(false)} className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-6 py-3 rounded-full hover:bg-white hover:text-[#2E73E6] transition-colors shadow-sm">
-            Main Menu
-          </button>
-        </div>
-      ) : (
-        <div className="flex-1 flex flex-col items-center justify-center relative z-20 animate-fade-in-global">
-          <div className="grid grid-cols-3 gap-2 w-full max-w-[240px] aspect-square mx-auto">
-            {moles.map((mole, i) => (
-              <div 
-                key={i} 
-                className="bg-white/10 rounded-2xl border border-white/10 relative overflow-hidden flex items-center justify-center cursor-pointer shadow-inner active:bg-white/5" 
-                onMouseDown={() => whack(i)}
-                onTouchStart={() => whack(i)}
-              >
-                {mole && (
-                  <div className={`w-[90%] h-[90%] rounded-xl flex items-center justify-center p-1 shadow-md scale-100 transition-transform active:scale-90 animate-fade-in-global ${mole.type === 'red' ? 'bg-[#E92A39]' : 'bg-[#10b981]'}`}>
-                    <span className="text-[10px] md:text-xs font-black tracking-tighter leading-none text-center break-words px-1 drop-shadow-sm">
-                      {mole.text}
-                    </span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+    <div
+      className={`bg-[#161616] border border-[#2A2A2E] rounded-xl shadow-xl ${className}`}
+      style={{ transform: `rotate(${rotate}deg)` }}
+    >
+      {children}
     </div>
   );
 }
 
 export default function Home() {
   const navigate = useNavigate();
-  
-  // --- PLATFORM STATE ---
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState('');
+
   const [opportunities, setOpportunities] = useState([]);
   const [isLoadingOpps, setIsLoadingOpps] = useState(true);
-
-  // --- UI STATE ---
   const [waitlistEmail, setWaitlistEmail] = useState('');
-  const [waitlistJoined, setWaitlistJoined] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isScrolled, setIsScrolled] = useState(false); 
+  const [waitlistStatus, setWaitlistStatus] = useState('idle');
+  const [copied, setCopied] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
-  const [showScrollPopup, setShowScrollPopup] = useState(false);
-  const [hasDismissedPopup, setHasDismissedPopup] = useState(
-    () => sessionStorage.getItem('popup_dismissed') === 'true'
-  );
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0 });
+  const [openFaq, setOpenFaq] = useState(-1);
+  const [heroVideoIndex, setHeroVideoIndex] = useState(0);
+
+  const teaserScrollRef = useRef(null);
+
+  // Seeded mock rank for the queue mechanic
+  const waitlistRank = 2843;
+
+  const heroVideos = [
+    travel, intervie, preparation2, pizza, prep, chaos, celebration4, celebration3
+  ].filter(Boolean); 
   
-  // --- FEATURE SLIDER STATE ---
-  const [featureSlide, setFeatureSlide] = useState(0);
-  const featureImages = [sliderImg6, sliderImg7, sliderImg8, sliderImg10, sliderImg11];
-  
-  // Vault View Toggle State
-  const [showAllVault, setShowAllVault] = useState(false);
+  const heroRedHooks = [
+    "sabse bade problems.", "real, unfiltered briefs.", "whiteboard war rooms.", 
+    "late-night build sessions.", "mentorship moments.", "campus showdowns.", 
+    "massive prize pools.", "your 'I made it' era." 
+  ];
 
-  // --- SCROLL REFS ---
-  const vaultScrollRef = useRef(null);
-  const timelineScrollRef = useRef(null);
-  
-  // --- POPUP LOGIC STATE ---
-  const [heroFactIndex, setHeroFactIndex] = useState(0);
-  const [showHeroFact, setShowHeroFact] = useState(false);
-  const [popupShownCount, setPopupShownCount] = useState(0); 
-
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-
-  // --- WALL LORE STATE ---
-  const [newSubmission, setNewSubmission] = useState('');
-  const [showSubmitMessage, setShowSubmitMessage] = useState(false);
-  const [wallSubmissions, setWallSubmissions] = useState([]);
-
-  // Generic horizontal scroll function
   const scrollTrack = (ref, direction) => {
     if (ref.current) {
       const scrollAmount = window.innerWidth > 768 ? 400 : 300;
@@ -415,94 +171,68 @@ export default function Home() {
     }
   };
 
-  const handleDismissPopup = () => {
-    setHasDismissedPopup(true);
-    sessionStorage.setItem('popup_dismissed', 'true');
-    setShowScrollPopup(false);
+  const scrollToWaitlist = () => {
+    document.getElementById('waitlist-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
-  // 0. FEATURE IMAGE SLIDER LOGIC
+  // Performant Scroll Listener
   useEffect(() => {
-    const timer = setInterval(() => {
-      setFeatureSlide((prev) => (prev + 1) % featureImages.length);
-    }, 4000); 
-    return () => clearInterval(timer);
-  }, [featureImages.length]);
-
-  // 1. SET UP COUNTDOWN BANNER
-  useEffect(() => {
-    const targetDate = new Date('2026-07-27T00:00:00').getTime();
-    const interval = setInterval(() => {
-      const now = new Date().getTime();
-      const distance = targetDate - now;
-
-      if (distance < 0) {
-        clearInterval(interval);
-        return;
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 50);
+          ticking = false;
+        });
+        ticking = true;
       }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
+  useEffect(() => {
+    if (heroVideos.length <= 1) return; 
+    const videoInterval = setInterval(() => {
+      setHeroVideoIndex((prevIndex) => (prevIndex + 1) % heroVideos.length);
+    }, 4000);
+    return () => clearInterval(videoInterval);
+  }, [heroVideos.length]);
+
+  useEffect(() => {
+    const targetDate = new Date('2026-08-31T00:00:00Z').getTime();
+    const tick = () => {
+      const distance = targetDate - Date.now();
+      if (distance < 0) { setCountdown({ days: 0, hours: 0, minutes: 0 }); return; }
       setCountdown({
         days: Math.floor(distance / (1000 * 60 * 60 * 24)),
         hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
+        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
       });
-    }, 1000);
+    };
+    tick();
+    const interval = setInterval(tick, 1000 * 30);
     return () => clearInterval(interval);
   }, []);
 
-  // 2. CHECK LOGIN STATUS ON MOUNT
-  useEffect(() => {
-    const jwt = localStorage.getItem('jwt');
-    const userStr = localStorage.getItem('user');
-    const sessionStart = localStorage.getItem('session_start');
-    
-    const SESSION_LIMIT = 24 * 60 * 60 * 1000; 
-
-    if (jwt && userStr && sessionStart) {
-      const timeElapsed = Date.now() - parseInt(sessionStart);
-      
-      if (timeElapsed > SESSION_LIMIT) {
-        localStorage.removeItem('jwt');
-        localStorage.removeItem('user');
-        localStorage.removeItem('session_start');
-        setIsLoggedIn(false);
-      } else {
-        setIsLoggedIn(true);
-        try {
-          const userObj = JSON.parse(userStr);
-          setUserName(userObj.name || userObj.username.split(' ')[0] || 'Student');
-        } catch (e) { console.error(e); }
-      }
-    }
-  }, []);
-
-  // 3. FETCH REAL CHALLENGES & WALL LORE FROM STRAPI
   useEffect(() => {
     const fetchPlatformData = async () => {
       try {
-        const oppsResponse = await axios.get(`${API_URL}/api/challenges`);
+        const oppsResponse = await axios.get(`${API_URL}/api/challenges`).catch(() => ({ data: { data: [] } }));
         const fetchedOpps = oppsResponse.data.data.map(item => {
-          const attr = item.attributes || item; 
-
+          const attr = item.attributes || item;
           let plainTextDescription = attr.description;
           if (Array.isArray(attr.description)) {
-            plainTextDescription = attr.description
-              .map(block => block.children ? block.children.map(child => child.text).join('') : '')
-              .join('\n');
+            plainTextDescription = attr.description.map(block => block.children ? block.children.map(child => child.text).join('') : '').join('\n');
           }
-
-          const compNameStr = attr.company || '';
-          const compNameLower = compNameStr.toLowerCase();
-          
           let finalLogoUrl = attr.logoUrl;
           if (!finalLogoUrl) {
+            const compNameLower = (attr.company || '').toLowerCase();
             if (compNameLower.includes('nuvoco')) finalLogoUrl = nuvocoLogo;
             else if (compNameLower.includes('srmb')) finalLogoUrl = srmbLogo;
             else if (compNameLower.includes('ingenx') || compNameLower.includes('ingenuityx')) finalLogoUrl = ingenxLogo;
             else if (compNameLower.includes('trootech')) finalLogoUrl = trootechLogo;
-            else finalLogoUrl = null;
           }
-
           return {
             id: item.documentId || item.id,
             title: attr.title,
@@ -514,1094 +244,720 @@ export default function Home() {
             points: attr.points,
             description: plainTextDescription,
             deadline: attr.deadline,
-            tags: [`#${attr.category}`, attr.type], 
           };
         });
-        
-        // --- INJECT ALL DUMMY CHALLENGES HERE ---
-        const DUMMY_CHALLENGES = [
-          {
-            id: "dummy-eveready-1",
-            title: "Keep It Lit",
-            company: "Eveready",
-            logoUrl: null,
-            bgImage: evereadyBg,
-            type: "Innovation Project",
-            category: "Innovation",
-            duration: "4 Weeks",
-            points: "Internship + ₹50,000",
-            description: "Reinvent portable lighting for rural and everyday India. Design a robust, affordable, and sustainable portable lighting solution that addresses the unique challenges of rural electrification and everyday utility.",
-            deadline: "Oct 30, 2026",
-            tags: ["#Innovation", "Product Design", "Sustainability"]
-          },
-          {
-            id: "dummy-trootech-1",
-            title: "TrooTech 2030: The Identity Problem",
-            company: "TrooTech Business Solutions",
-            logoUrl: trootechLogo,
-            bgImage: trootechPosterBg,
-            type: "Innovation Challenge",
-            category: "Innovation",
-            duration: "5 Weeks",
-            points: "Pre-Placement Interview",
-            description: "TrooTech is a 350+ person AI company with an ambitious 2030 vision. The problem? Their brand story needs an identity shift. Innovate, collaborate, and change the game in this challenge built for the next generation of thinkers. Ideas today. Impact tomorrow.",
-            deadline: "Oct 28, 2026",
-            tags: ["#Innovation", "Brand Identity", "AI"]
-          },
-          {
-            id: "dummy-ingenuityx-1",
-            title: "Market InGenuityX. Seriously.",
-            company: "InGenuityX",
-            logoUrl: ingenxLogo,
-            bgImage: ingenxPosterBg,
-            type: "Competition",
-            category: "Marketing",
-            duration: "3 Weeks",
-            points: "PPO Available",
-            description: "We connect India's sharpest Gen-Z students with real brand challenges. But here's the thing — we need YOUR help to market us. A marketing challenge for the bold and the brilliant. Pitch the ultimate growth and brand strategy for InGenuityX itself.",
-            deadline: "Oct 25, 2026",
-            tags: ["#Marketing", "Growth Strategy", "B2C"]
-          },
-          {
-            id: "dummy-legrand-1",
-            title: "Power Protocol",
-            company: "Legrand",
-            logoUrl: null,
-            bgImage: legrandBg,
-            type: "Tech Hackathon",
-            category: "Tech",
-            duration: "3 Weeks",
-            points: "₹1,00,000 + Tech Setup",
-            description: "AI Ready Data Centre Power Challenge. Design the next generation of intelligent, energy-efficient power distribution systems capable of sustaining high-density AI data centers.",
-            deadline: "Oct 20, 2026",
-            tags: ["#Tech", "AI", "Data Centers"]
-          },
-          {
-            id: "dummy-nuvoco-1",
-            title: "Grey 2 Green",
-            company: "Nuvoco",
-            logoUrl: nuvocoLogo,
-            bgImage: nuvocoGreenBg,
-            type: "Sustainability Project",
-            category: "Sustainability",
-            duration: "4 Weeks",
-            points: "PPI + ₹50,000",
-            description: "Green Cement and Decarbonisation Systems. Develop innovative strategies to drastically reduce the carbon footprint in cement manufacturing and supply chains.",
-            deadline: "Oct 18, 2026",
-            tags: ["#Sustainability", "Green Tech"]
-          },
-          {
-            id: "dummy-srmb-1",
-            title: "Solid Shift Challenge",
-            company: "SRMB",
-            logoUrl: srmbLogo,
-            bgImage: srmbShiftBg,
-            type: "Innovation Challenge",
-            category: "Design",
-            duration: "5 Weeks",
-            points: "₹75,000 Pool",
-            description: "Reimagine Advanced Materials and Smart Concrete. Pitch a revolutionary approach to building materials that adapt to environmental stress and increase longevity.",
-            deadline: "Oct 25, 2026",
-            tags: ["#Design", "Smart Materials"]
-          },
-          {
-            id: "dummy-srmb-2",
-            title: "Sustainable Green Pro",
-            company: "SRMB",
-            logoUrl: srmbLogo,
-            bgImage: srmbGreenProBg,
-            type: "Sustainability Project",
-            category: "Sustainability",
-            duration: "3 Weeks",
-            points: "PPO + ₹25,000",
-            description: "Building a Greener Tomorrow. Stronger Together. Propose actionable, closed-loop recycling processes for steel manufacturing to eliminate industrial waste.",
-            deadline: "Oct 12, 2026",
-            tags: ["#Sustainability", "Recycling"]
-          },
-          {
-            id: "dummy-srmb-3",
-            title: "Ironclad Challenge",
-            company: "SRMB",
-            logoUrl: srmbLogo,
-            bgImage: srmbIroncladBg,
-            type: "Marketing Campaign",
-            category: "Marketing",
-            duration: "4 Weeks",
-            points: "Internship + ₹40,000",
-            description: "Design a robust go-to-market and brand positioning strategy to solidify SRMB as the undeniable leader in resilient construction materials for Gen-Z homeowners.",
-            deadline: "Oct 22, 2026",
-            tags: ["#Marketing", "Brand Strategy"]
-          },
-          {
-            id: "dummy-illustrative-123",
-            title: "Next-Gen Smile Challenge",
-            company: "NovaCare (Illustrative)",
-            logoUrl: null, 
-            bgImage: colgateBg, 
-            type: "Marketing Campaign",
-            category: "Marketing",
-            duration: "4 Weeks",
-            points: "PPO + ₹50,000",
-            description: "Oral care is seen as a chore. NovaCare wants to make it a lifestyle. Gen-Z is getting swayed by aesthetic DTC brands—your job is to make the OG brand iconic again.",
-            deadline: "Oct 15, 2026",
-            tags: ["#Marketing", "Marketing Campaign"]
-          }
-        ];
-        
-        setOpportunities([...DUMMY_CHALLENGES, ...fetchedOpps]);
 
-        const wallResponse = await axios.get(`${API_URL}/api/wall-lores?sort=createdAt:desc`);
-        const fetchedLores = wallResponse.data.data.map(item => ({
-          id: item.documentId || item.id,
-          text: item.text || item.attributes?.text,
-          reactions: { '💀 too real': 0, 'felt.': 0, 'same bro': 0, 'bro cooked': 0 }
-        }));
-        
-        if (fetchedLores.length > 0) {
-          setWallSubmissions(fetchedLores);
-        } else {
-          setWallSubmissions([
-            { text: "Never challenged for real-world skills.", reactions: { '💀 too real': 23, 'felt.': 18, 'same bro': 31 } },
-            { text: "My internship was mostly Canva & random calls.", reactions: { '💀 too real': 45, 'felt.': 29, 'bro cooked': 12 } }
-          ]);
-        }
+        const DEMO_CHALLENGES = [
+          { id: "demo-eveready-1", title: "Keep It Lit", company: "Eveready", logoUrl: null, bgImage: evereadyBg, type: "Innovation Project", category: "Innovation", duration: "4 Weeks", points: "Internship + Rs 50k", description: "Reinvent portable lighting for rural and everyday India. Design a robust, affordable, and sustainable portable lighting solution.", deadline: "Oct 30, 2026", isDemo: true },
+          { id: "demo-trootech-1", title: "TrooTech 2030", company: "TrooTech", logoUrl: trootechLogo, bgImage: trootechPosterBg, type: "Innovation Challenge", category: "Innovation", duration: "5 Weeks", points: "Certification", description: "Reposition a 350+ person AI company's brand story. Innovate, collaborate, and change the game in this challenge.", deadline: "Oct 28, 2026", isDemo: true },
+          { id: "demo-legrand-1", title: "Power Protocol", company: "Legrand", logoUrl: null, bgImage: legrandBg, type: "Tech Hackathon", category: "Tech", duration: "3 Weeks", points: "Rs 1L + Tech Setup", description: "Design intelligent power distribution for AI data centers. Develop energy-efficient systems capable of sustaining high-density loads.", deadline: "Oct 20, 2026", isDemo: true },
+          { id: "demo-nuvoco-1", title: "Grey 2 Green", company: "Nuvoco", logoUrl: nuvocoLogo, bgImage: nuvocoGreenBg, type: "Sustainability Project", category: "Sustainability", duration: "4 Weeks", points: "PPI + Rs 50k", description: "Cut the carbon footprint of cement manufacturing. Develop innovative strategies to drastically reduce emissions across supply chains.", deadline: "Oct 18, 2026", isDemo: true },
+          { id: "demo-srmb-1", title: "Solid Shift Challenge", company: "SRMB", logoUrl: srmbLogo, bgImage: srmbShiftBg, type: "Innovation Challenge", category: "Design", duration: "5 Weeks", points: "Rs 75k Pool", description: "Reimagine advanced building materials. Pitch a revolutionary approach to materials that adapt to environmental stress.", deadline: "Oct 25, 2026", isDemo: true },
+          { id: "demo-srmb-3", title: "Ironclad Challenge", company: "SRMB", logoUrl: srmbLogo, bgImage: srmbIroncladBg, type: "Marketing Campaign", category: "Marketing", duration: "4 Weeks", points: "Internship + Rs 40k", description: "Position SRMB among Gen-Z homeowners. Design a robust go-to-market strategy to solidify their leadership.", deadline: "Oct 22, 2026", isDemo: true }
+        ];
+
+        setOpportunities([...DEMO_CHALLENGES, ...fetchedOpps]);
       } catch (error) {
         console.error("Error fetching platform data:", error);
       } finally {
         setIsLoadingOpps(false);
       }
     };
-
     fetchPlatformData();
   }, []);
 
-  const handleLogoutClick = () => setShowLogoutModal(true);
-
-  const confirmLogout = () => {
-    localStorage.removeItem('jwt');
-    localStorage.removeItem('user');
-    localStorage.removeItem('session_start');
-    
-    setIsLoggedIn(false);
-    setUserName('');
-    setShowLogoutModal(false);
-    window.location.reload(); 
-  };
-
   const handleWaitlistJoin = async () => {
-    if (!waitlistEmail) return;
-    try {
-      await axios.post(`${API_URL}/api/waitlists`, {
-        data: { email: waitlistEmail }
-      });
-      setWaitlistJoined(true);
-    } catch (err) {
-      setWaitlistJoined(true);
-      console.error('Waitlist error:', err);
-    }
-  };
-
-  const heroSlides = [
-    { isCustom: true, image: billboardImage },
-    { title: 'Your "I made it" era starts here.', subtitle: "Let's kickstart your best career decision moments…", image: heroImage2 },
-    { title: 'What if your next assignment... was for your favourite brand?', subtitle: 'They are looking for their next superstars, ready to get noticed by them?', image: heroImage3 },
-    { title: 'Confined by boundaries? Not me ', subtitle: 'Aur tumhara breakthrough bhi.', microcopy: 'Main character arc loading... 🎬', image: heroImage2 }
-  ];
-
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-  const prevSlide = () => setCurrentSlide((prev) => (prev === 0 ? heroSlides.length - 1 : prev - 1));
-
-  useEffect(() => {
-    const interval = setInterval(() => setCurrentSlide((prev) => (prev + 1) % heroSlides.length), 5000);
-    return () => clearInterval(interval); 
-  }, [heroSlides.length]);
-
-  const didYouKnows = [
-    { text: "The average resume gets 6-7 seconds of HR attention in the first pass. Six. Seconds. The real screening happens in the conversation after — which means how you talk about your work matters infinitely more than bullet points.", tag: "READ THAT AGAIN" },
-    { text: "73% of hiring managers say they can't find candidates with \"real-world problem-solving skills\" — despite millions of graduates every year. The gap isn't your degree. It's your exposure.", source: "LinkedIn Global Talent Trends" },
-    { text: "In most big companies, the idea that gets implemented is rarely the smartest one. It's the one that had the best internal sponsor. Learning to \"sell\" your idea is a skill.", tag: "THE CORPORATE GAME IS REAL" },
-    { text: "Many companies hire fresh graduates specifically for brand challenges because they want unconditioned thinking — perspectives that haven't been filtered by 10 years of corporate norms.", tag: "TIMESTAMP THIS" }
-  ];
-
-  const handleCloseFact = () => {
-    setShowHeroFact(false);
-    if (popupShownCount === 1) {
-      setTimeout(() => {
-        setHeroFactIndex((prev) => (prev + 1) % didYouKnows.length);
-        setShowHeroFact(true);
-        setPopupShownCount(2); 
-      }, 120000); 
-    }
-  };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight;
-      const winHeight = window.innerHeight;
-      const scrollPercent = (scrollTop / (docHeight - winHeight)) * 100;
-      
-      // 85% Scroll Threshold for Registration Popup
-      if (scrollPercent >= 85 && !showScrollPopup && !hasDismissedPopup && !isLoggedIn) {
-        setShowScrollPopup(true);
-      }
-      
-      // 25% Scroll Threshold for Did You Know Popup
-      if (scrollPercent >= 25 && popupShownCount === 0) {
-        setShowHeroFact(true);
-        setPopupShownCount(1);
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [showScrollPopup, hasDismissedPopup, isLoggedIn, popupShownCount]);
-
-  const handleWallSubmit = async (e) => {
-    e.preventDefault();
-    if (!isLoggedIn) {
-      setShowLoginModal(true);
+    const trimmedEmail = waitlistEmail.trim();
+    if (!trimmedEmail || !EMAIL_REGEX.test(trimmedEmail)) {
+      setWaitlistStatus('error');
       return;
     }
-    if (newSubmission.trim()) {
-      const jwt = localStorage.getItem('jwt');
-      try {
-        await axios.post(`${API_URL}/api/wall-lores`, {
-          data: { text: newSubmission, publishedAt: null }
-        }, { headers: { Authorization: `Bearer ${jwt}` } });
-
-        setNewSubmission('');
-        setShowSubmitMessage(true);
-        setTimeout(() => setShowSubmitMessage(false), 4000);
-      } catch (err) {
-        console.error("Error submitting to wall:", err);
-      }
+    setWaitlistStatus('submitting');
+    try {
+      await axios.post(`${API_URL}/api/waitlists`, { data: { email: trimmedEmail } }).catch(()=>{});
+      setWaitlistStatus('success');
+    } catch (err) {
+      setWaitlistStatus('success'); 
     }
   };
 
-  const handleReaction = (submissionIndex, reactionType) => {
-    const updated = [...wallSubmissions];
-    if (!updated[submissionIndex].reactions[reactionType]) updated[submissionIndex].reactions[reactionType] = 0;
-    updated[submissionIndex].reactions[reactionType]++;
-    setWallSubmissions(updated);
-  };
-
-  const categories = [
-    { title: 'Marketing & Business', quote: '"Pooja… what is this (consumer) behaviour?"', tagline: 'Brand strategy, GTM, consumer research, corporate yapping — the real ones know.', route: '/marketing-business', colors: 'bg-[#2E73E6] text-white', quoteColor: 'text-white/90', taglineColor: 'text-white/90' },
-    {  title: 'Innovation Challenges', quote: '"For that one bro who thinks he can be the next Elon Musk after one cool idea."', tagline: "Okay but what if your idea is actually good? Here's your structured shot at proving it.", route: '/innovation', colors: 'bg-[#E92A39] text-white', quoteColor: 'text-white/90', taglineColor: 'text-white/90' },
-    { title: 'Tech & Hackathons', quote: '"Placement ke pehle thoda iconic bhi ban jao."', tagline: 'Build something that actually works, in 24-48 hours, on 3 hours of sleep and 2 cups of chai. The classic origin story.', route: '/tech-hackathons', colors: 'bg-[#FDE25D] text-[#111]', quoteColor: 'text-[#111]/90', taglineColor: 'text-[#111]/90' },
-    {  title: 'Sustainability', quote: '"Basically Earth\'s unpaid PR team."', tagline: 'Someone has to care. Might as well be the person who will eventually manage a brand that affects millions of people. Start now.', route: '/sustainability', colors: 'bg-[#3BA8E7] text-white', quoteColor: 'text-white/90', taglineColor: 'text-white/90' },
-    {  title: 'Creativity', quote: '"For our \'Can we make it pop more?\' trauma survivors."', tagline: "If you've ever redesigned a deck at 2AM and felt nothing — this is your therapy. Except it pays (or gets you hired).", route: '/creativity', colors: 'bg-[#FB607E] text-white', quoteColor: 'text-white/90', taglineColor: 'text-white/90' }
-  ];
-  
-  // --- UPDATED: 4-STEP TIMELINE JOURNEY ---
-  const steps = [
-    { 
-      number: 1, 
-      title: 'CATCH THE DROP', 
-      quote: '"No endless scrolling through dead listings."', 
-      description: 'Our briefs launch as timed, exclusive events. You get on the waitlist, set your alarm, and get the brief the second the clock hits zero.', 
-      image: registeredImage 
-    },
-    { 
-      number: 2, 
-      title: 'ASSEMBLE THE GRID', 
-      quote: '"Build your team for the brief, not your college."', 
-      description: 'Stop relying on whoever happens to be free in your batch. Use our Cross-Campus Matchmaking to build a surgical team—pair your strategy with a designer from NID and a coder from BITS.', 
-      didYouKnow: '💡 Cross-campus teams historically score 40% higher in strategy execution.', 
-      image: null 
-    },
-    { 
-      number: 3, 
-      title: 'THE VERDICT (NO GHOSTING)', 
-      quote: '"You will always know exactly why you didn\'t advance."', 
-      description: "If you don't make the cut, you don't get ghosted. You get The Rejection Letter—a structured, data-backed breakdown of your insight, strategy, and execution.", 
-      image: null 
-    },
-    { 
-      number: 4, 
-      title: 'THE LIVE BOARDROOM', 
-      quote: '"The whole campus ecosystem watches you plant your flag."', 
-      description: 'If you make the shortlist, you don\'t pitch to an HR intern on a hidden Zoom call. You pitch directly to C-Suite executives on our public, live-streamed Grand Finale.', 
-      image: groupDiscussion 
-    }
+  const faqs = [
+    { q: "Is this actually legit, or just dummy projects?", a: "Every brief on InGenuityX comes directly from a verified corporate partner looking to solve a real business problem. If you win, the brand actually implements (or tests) your solution." },
+    { q: "Do I need to be from a top college to apply?", a: "No. Brands evaluate your submission, not your college name. We hide academic pedigree during the initial shortlist phase to ensure ideas win on merit." },
+    { q: "Do I need a team?", a: "It depends on the brief. Some are solo, but most allow cross-campus teams (up to 4 members). You can build a team with friends from entirely different colleges." },
+    { q: "Is there an entry fee?", a: "Never. InGenuityX is completely free for students. Brands pay to host challenges, you participate for free." },
+    { q: "What happens if I submit but don't win?", a: "You get 'The Rejection Letter'—a scorecard breaking down exactly how judges rated your Insight, Strategy, and Execution so you can actually improve." }
   ];
 
-  const stepColors = [
-    'bg-[#2E73E6]/5 border-[#2E73E6]/20', 
-    'bg-[#FB607E]/5 border-[#FB607E]/20', 
-    'bg-[#FDE25D]/10 border-[#FDE25D]/40', 
-    'bg-[#3BA8E7]/5 border-[#3BA8E7]/20', 
-    'bg-[#FB9AB5]/10 border-[#FB9AB5]/40', 
-    'bg-[#E92A39]/5 border-[#E92A39]/20'
-  ];
-
-  const hrMistakes = [
-    { percent: '97%', title: 'Indian introductions have had the same software update since 2009.', quote: '"Myself Rahul. I am passionate, hardworking and a quick learner…"', punchline: 'Bro this intro has more sequels than Fast & Furious.' },
-    { percent: '84%', title: 'Indian resumes still running on Windows XP energy.', details: '"Microsoft Word ⭐⭐⭐⭐⭐"\n"PowerPoint ⭐⭐⭐⭐"\n"Canva ⭐⭐⭐⭐⭐"', punchline: 'Bhai Canva toh ab breathing skill category mein aata hai 😭' },
-    { percent: '73%', title: "Mass applying everywhere like it's Big Billion Day sale.", details: 'LinkedIn. Naukri. Internshala. Cold mails. Carrier pigeons.\nJD says: "Looking for a backend developer."\nBro applying with Canva + "good communication skills"', punchline: '' }
-  ];
-
-  const confessions = [
-    { text: '"Never challenged for real-world skills."', tags: ['ACADEMIC BUBBLE', 'CAMPUS REALITY CHECK'] },
-    { text: '"My internship was mostly Canva & random calls."', tags: ['INTERNSHIP ERA', 'CORPORATE NPC ARC'] },
-    { text: '"We have certificates. Not clarity."', tags: ['PLACEMENT PANIC', 'CREDENTIAL COLLECTOR'] },
-    { text: '"Everyone says upskill. Nobody explains how."', tags: ['AI FEAR', 'LOST IN THE NOISE'] },
-    { text: '"Our exposure feels outdated."', tags: ['SYLLABUS GAP', 'REAL WORLD VS COLLEGE'] },
-    { text: '"Too qualified for internships. Too inexperienced for jobs."', tags: ['PLACEMENT PANIC', 'THE CRUEL PARADOX'] }
-  ];
-
-  const confessionStyles = [
-    { bg: 'bg-[#2E73E6]', text: 'text-white', tagBg: 'bg-white/20 text-white' },
-    { bg: 'bg-[#FDE25D]', text: 'text-[#111]', tagBg: 'bg-black/10 text-[#111]' },
-    { bg: 'bg-[#FB607E]', text: 'text-white', tagBg: 'bg-white/20 text-white' },
-    { bg: 'bg-[#3BA8E7]', text: 'text-white', tagBg: 'bg-white/20 text-white' },
-    { bg: 'bg-[#126769]', text: 'text-white', tagBg: 'bg-white/20 text-white' }, 
-    { bg: 'bg-[#E92A39]', text: 'text-white', tagBg: 'bg-white/20 text-white' },
-  ];
-
-  const filters = ['All', 'Internships', 'Competitions', 'Projects', 'PPO', 'Remote', 'Paid', 'Tech', 'Marketing', 'Design', 'Business', 'Content'];
-
+  const filters = ['All', 'Marketing', 'Tech', 'Design', 'Sustainability', 'Innovation'];
   const filteredOpportunities = opportunities.filter(opp => {
-    const matchesFilter = activeFilter === 'All' || opp.type === activeFilter || opp.category === activeFilter || (activeFilter === 'PPO' && opp.points?.includes('PPO'));
-    const matchesSearch = searchQuery === '' ||
-      opp.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      opp.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      opp.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = activeFilter === 'All' || opp.category === activeFilter;
+    const matchesSearch = searchQuery === '' || opp.title?.toLowerCase().includes(searchQuery.toLowerCase()) || opp.company?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
-  // Split out the first 4 for the slider if not showing all
-  const displayedOpportunities = showAllVault ? filteredOpportunities : filteredOpportunities.slice(0, 4);
+  const uniqueRewards = Array.from(new Set(opportunities.map(o => o.points).filter(Boolean))).slice(0, 4);
+
+  // Pre-launch: no real "squads mid-brief" number exists yet. Wire this to
+  // a real live count once the vault opens Aug 31 — until then it renders
+  // as "—" so we're not faking a stat.
+  const liveSquadCount = 0;
 
   return (
-    <div className="min-h-screen bg-[#FAFCFC] text-[#111] font-sans overflow-x-hidden animate-fade-in-global relative selection:bg-[#E92A39] selection:text-white" data-testid="home-page">
+    <div className="grain min-h-screen bg-transparent text-[#FAFAFA] font-sans overflow-x-hidden relative selection:bg-[#E92A39] selection:text-white">
       
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
-        
-        * { font-family: 'Outfit', sans-serif; }
-        
-        [id*="emergent"], [class*="emergent"], a[href*="emergent"] {
-          display: none !important; opacity: 0 !important; pointer-events: none !important;
-        }
+      {/* GLOBAL BACKGROUND IMAGE WITH BLUR OVERLAY */}
+      <div className="fixed inset-0 z-[-1] bg-black">
+        <img src={GLOBAL_BG} alt="" className="w-full h-full object-cover opacity-30 mix-blend-screen" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#151515]/80 via-[#151515]/95 to-[#151515] backdrop-blur-[60px]"></div>
+      </div>
 
-        @keyframes fadeInGlobal { from { opacity: 0; } to { opacity: 1; } }
-        .animate-fade-in-global { animation: fadeInGlobal 0.5s ease-out forwards; }
-        
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Kalam:wght@400;700&display=swap');
+        * { font-family: 'Outfit', sans-serif; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .grain::before {
+          content: ''; position: fixed; inset: 0;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+          pointer-events: none; z-index: 100; mix-blend-mode: overlay;
+        }
+        @keyframes textFadeUp { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-text-fade-up { animation: textFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeInOpacity { 0% { opacity: 0; transform: scale(1.05); } 100% { opacity: 0.8; transform: scale(1); } }
+        .animate-video-fade { animation: fadeInOpacity 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
       `}</style>
 
       {/* COUNTDOWN BANNER */}
-      <div className="fixed top-0 w-full h-10 bg-[#111] text-white px-6 text-center text-xs font-black uppercase tracking-widest flex items-center justify-center gap-3 z-[60] shadow-md">
-        <span className="text-[#E92A39] animate-pulse">🔴 LIVE</span>
-        <span className="hidden sm:inline">Launching in</span> {countdown.days}d {countdown.hours}h {countdown.minutes}m —
-        <button onClick={() => document.getElementById('waitlist-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="underline hover:text-[#FDE25D] transition-colors">
-          Join the waitlist
-        </button>
+      <div className="fixed top-0 w-full h-10 bg-[#0A0A0A]/80 backdrop-blur-md text-[#FAFAFA] px-4 md:px-6 text-center text-[10px] md:text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 md:gap-3 z-[60] border-b border-[#2A2A2E]">
+        <span className="text-[#E92A39] animate-pulse">LIVE</span>
+        <span className="hidden sm:inline">Launching in</span> {countdown.days}d {countdown.hours}h {countdown.minutes}m --
+        <button onClick={scrollToWaitlist} className="underline hover:text-[#E92A39] transition-colors">Join</button>
       </div>
 
-      {/* NAVBAR (Dynamic Transparency) */}
-      <nav className={`fixed top-10 w-full z-50 px-6 py-4 md:px-12 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm' : 'bg-gradient-to-b from-black/70 to-transparent'}`}>
-        <div className="flex items-center group" data-testid="hero-logo">
-          <div className={`transition-all duration-500 flex items-center justify-center ${!isScrolled ? 'bg-white px-6 py-3 rounded-[1.5rem] shadow-2xl -ml-2 md:ml-0' : ''}`}>
-            <img 
-              src={logoImage} 
-              alt="InGenuityX" 
-              className={`w-auto object-contain cursor-pointer transition-all duration-500 hover:scale-110 ${!isScrolled ? 'h-10 md:h-12 scale-[1.5] md:scale-[1.8]' : 'h-6 md:h-8 scale-[1.3] md:scale-[1.5]'}`} 
-            />
-          </div>
+      {/* NAVBAR */}
+      <nav className={`fixed top-10 w-full z-50 px-4 md:px-12 py-3 md:py-4 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#2A2A2E] shadow-sm' : 'bg-gradient-to-b from-black/80 to-transparent pt-6 md:pt-4'}`}>
+        <div className="w-auto md:w-48 flex justify-start">
+          <Link to="/" className="hover:opacity-80 transition-opacity flex items-center">
+            <img src={logoImage} alt="InGenuityX" className={`w-auto object-contain transition-all duration-300 ${isScrolled ? 'h-6 md:h-8' : 'h-8 md:h-10'}`} />
+          </Link>
         </div>
-
-        <div className={`hidden md:flex items-center gap-10 text-sm font-bold tracking-wide transition-colors duration-300 ${isScrolled ? 'text-gray-600' : 'text-white/90'}`}>
-          <a href="#opportunities" className={`transition-colors ${isScrolled ? 'hover:text-[#E92A39]' : 'hover:text-white'}`}>Opportunities</a>
-          <Link to="/about" className={`transition-colors ${isScrolled ? 'hover:text-[#E92A39]' : 'hover:text-white'}`}>About Us</Link>
-          <Link to="/contact" className={`transition-colors ${isScrolled ? 'hover:text-[#E92A39]' : 'hover:text-white'}`}>Contact</Link>
+        <div className={`hidden md:flex items-center justify-center gap-10 text-sm font-bold tracking-wide transition-colors duration-300 flex-1 ${isScrolled ? 'text-[#A1A1AA]' : 'text-white/90'}`}>
+          <a href="#opportunities" className="hover:text-[#FAFAFA] transition-colors">Opportunities</a>
+          <Link to="/for-brands" className="hover:text-[#FAFAFA] transition-colors">For Brands</Link>
+          <Link to="/about" className="hover:text-[#FAFAFA] transition-colors">About Us</Link>
         </div>
-
-        <div className="flex items-center gap-4">
-          {isLoggedIn ? (
-            <>
-              <span className={`font-bold hidden md:block text-sm transition-colors duration-300 ${isScrolled ? 'text-black' : 'text-white'}`}>Hey, {userName}</span>
-              <button 
-                onClick={handleLogoutClick}
-                className={`px-5 py-2.5 rounded-full font-bold transition-colors text-sm shadow-sm ${isScrolled ? 'bg-gray-100 hover:bg-gray-200 text-black' : 'bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border border-white/20'}`}
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/login" className={`font-bold transition-colors text-sm ${isScrolled ? 'text-gray-600 hover:text-black' : 'text-white/90 hover:text-white'}`}>
-                Log In
-              </Link>
-              <button 
-                disabled
-                className={`bg-gray-400 text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-sm cursor-not-allowed`}
-              >
-                Registration opens 27th July
-              </button>
-            </>
-          )}
+        <div className="w-auto md:w-48 flex justify-end">
+          <button onClick={scrollToWaitlist} className="bg-[#E92A39] hover:bg-[#ff3b4b] text-white px-5 md:px-6 py-2 md:py-2.5 rounded-full font-bold text-xs md:text-sm shadow-sm transition-colors">
+            Join Waitlist
+          </button>
         </div>
       </nav>
 
-      {/* FULL SCREEN HERO SECTION */}
-      <section className="relative w-full h-screen min-h-[600px] flex items-center justify-center overflow-hidden bg-black" data-testid="hero-section">
-        {heroSlides.map((slide, index) => (
-          <div key={index} className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
-            <div className="absolute inset-0">
-              <ImageWithFallback src={slide.image} alt={slide.title || "Hero Image"} className="w-full h-full object-cover opacity-80 object-right md:object-center" />
-              {/* Dark overlay ensuring text and nav readability */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/80" />
-            </div>
-            
-            {/* Content Container */}
-            <div className="relative z-20 h-full max-w-[1600px] mx-auto flex flex-col justify-center px-6 md:px-12 lg:px-20 w-full pt-16">
-              <div className="w-full lg:w-4/5 xl:w-3/5">
-                
-                {/* CONDITIONAL RENDER: Custom Marketing Slide vs Default Slides */}
-                {slide.isCustom ? (
-                  <>
-                    <h1 className="text-4xl md:text-6xl lg:text-[72px] font-extrabold tracking-tight mb-6 leading-[1.05] text-white drop-shadow-md">
-                      Duniya ke sabse bade brands <br/>
-                      ke <br/>
-                      <span className="text-[#E92A39]">sabse bade problems.</span>
-                    </h1>
-                    <p className="text-lg md:text-2xl text-white/70 italic mb-10 font-bold drop-shadow-sm">
-                      Waiting for your solution.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <h1 className="text-5xl md:text-6xl lg:text-[80px] font-extrabold tracking-tight mb-6 leading-[1.05] text-white drop-shadow-md">
-                      {slide.title}
-                    </h1>
-                    <p className="text-lg md:text-2xl text-white/90 mb-10 max-w-xl leading-relaxed font-bold drop-shadow-sm">
-                      {slide.subtitle}
-                    </p>
-                  </>
-                )}
-
-                {/* WAITLIST CAPTURE FORM */}
-                <div id="waitlist-form" className="mt-6 w-full animate-fade-in-global scroll-mt-32">
-                  {!waitlistJoined ? (
-                    <div className="flex flex-col sm:flex-row gap-3 w-full max-w-lg">
-                      <input 
-                        type="email" 
-                        placeholder="Enter your email for early access" 
-                        value={waitlistEmail}
-                        onChange={(e) => setWaitlistEmail(e.target.value)}
-                        className="flex-1 bg-white/10 border border-white/30 text-white placeholder:text-white/60 px-6 py-4 rounded-full focus:outline-none focus:border-white/80 backdrop-blur-md font-bold shadow-inner"
-                      />
-                      <button 
-                        onClick={handleWaitlistJoin} 
-                        className="bg-[#E92A39] text-white px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest shrink-0 hover:scale-105 hover:bg-[#ff3b4b] transition-all duration-300 shadow-xl border border-[#E92A39]"
-                      >
-                        Join Waitlist
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="inline-block bg-[#10b981]/20 border border-[#10b981]/50 backdrop-blur-md px-6 py-4 rounded-2xl text-white font-bold text-sm shadow-sm animate-fade-in-global">
-                      ✅ You're on the list. Keep an eye on your inbox!
-                      <button onClick={() => document.getElementById('opportunities')?.scrollIntoView({ behavior: 'smooth' })} className="text-[#FDE25D] underline text-xs mt-3 block hover:text-white transition-colors text-left w-full">
-                        Explore the challenges →
-                      </button>
-                    </div>
-                  )}
-                  {!waitlistJoined && (
-                    <p className="text-white/80 text-xs font-bold mt-4 uppercase tracking-widest drop-shadow-md flex items-center gap-2">
-                      <span className="text-[#FDE25D] animate-pulse">⏳</span> Launches 27th July
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-
-        {/* Slider Controls */}
-        <div className="absolute bottom-12 right-6 md:right-12 z-20 flex gap-2">
-          <button onClick={prevSlide} className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white hover:text-[#2E73E6] text-white w-12 h-12 flex items-center justify-center rounded-full transition-colors font-bold shadow-sm">←</button>
-          <button onClick={nextSlide} className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white hover:text-[#2E73E6] text-white w-12 h-12 flex items-center justify-center rounded-full transition-colors font-bold shadow-sm">→</button>
+      {/* 1. HERO SECTION & QUEUE MECHANIC */}
+      <section className="relative w-full min-h-[100dvh] flex items-start justify-center overflow-hidden bg-transparent pb-24 lg:pb-32 pt-[22vh] md:pt-[28vh]">
+        <div className="absolute inset-0 bg-transparent">
+          {heroVideos && heroVideos.length > 0 ? (
+            <video key={heroVideoIndex} src={heroVideos[heroVideoIndex]} poster={billboardImage} autoPlay muted playsInline loop className="w-full h-full object-cover opacity-0 animate-video-fade" />
+          ) : (
+            <ImageWithFallback src={billboardImage} alt="InGenuityX" className="w-full h-full object-cover opacity-80" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#151515]/90 via-[#151515]/50 to-transparent" />
         </div>
-      </section>
 
-      {/* COMPANIES ON BOARD - PRE-LAUNCH STRIP */}
-      <section className="py-8 bg-white border-b border-gray-200 relative z-20">
-        <div className="max-w-[1600px] mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center justify-center md:justify-between gap-6 md:gap-12">
-          <p className="text-xs font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center md:text-left">
-            These companies are waiting for your ideas
-          </p>
-          <div className="flex items-center justify-center gap-8 md:gap-16 flex-wrap transition-all duration-500">
-            <img src={nuvocoLogo} alt="Nuvoco" className="h-8 md:h-10 object-contain" />
-            <img src={srmbLogo} alt="SRMB" className="h-8 md:h-10 object-contain" />
-            <img src={trootechLogo} alt="TrooTech" className="h-8 md:h-10 object-contain" />
-            <img src={ingenxLogo} alt="InGenuityX" className="h-8 md:h-10 object-contain" />
-          </div>
-        </div>
-      </section>
-
-      {/* CREDIBILITY PROOF STRIP */}
-      <ScrollReveal direction="up">
-        <section className="px-4 md:px-8 max-w-[1600px] mx-auto mt-12 mb-16 relative z-20">
-          <div className="bg-white border border-gray-200 rounded-[2rem] shadow-sm grid grid-cols-2 md:grid-cols-4 overflow-hidden">
-            {[
-              { value: '9', label: 'Live Challenges' },
-              { value: '6', label: 'Partner Companies' },
-              { value: '₹5L+', label: 'Prize Pool' },
-              { value: '4', label: 'States Reached' },
-            ].map((stat, index) => (
-              <div key={index} className="py-4 px-6 md:py-5 md:px-8 border-b md:border-b-0 md:border-r border-gray-100 last:border-r-0 flex flex-col justify-center">
-                <h3 className="text-2xl md:text-4xl font-black text-[#111] leading-none">{stat.value}</h3>
-                <p className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest mt-1.5">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </ScrollReveal>
-
-      {/* --- UPDATED: NOT JUST LISTINGS SECTION (IMAGE LEFT, CARDS RIGHT) --- */}
-      <section className="py-24 px-4 md:px-8 bg-[#FAFCFC] border-y border-gray-200 relative z-10">
-        <ScrollReveal direction="up">
-          <div className="max-w-[1600px] mx-auto">
+        <div className="relative z-20 max-w-[1600px] mx-auto flex flex-col px-4 md:px-12 lg:px-20 w-full">
+          <div className="w-full lg:w-4/5 xl:w-3/5">
+            <h1 className="text-4xl md:text-6xl lg:text-[72px] font-extrabold tracking-tight mb-4 md:mb-6 leading-[1.1] md:leading-[1.05] text-[#FAFAFA] flex flex-col items-start min-h-[90px] md:min-h-[160px]">
+              <span className="block">Duniya ke sabse bade brands ke</span>
+              <span key={heroVideoIndex} className="text-[#E92A39] block animate-text-fade-up mt-1 md:mt-2">
+                {heroRedHooks[heroVideoIndex % heroRedHooks.length]}
+              </span>
+            </h1>
             
-            {/* Header Text */}
-            <div className="max-w-3xl mb-12">
-              <h3 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-6 text-[#111]">
-                Not just listings. Real career signals.
-              </h3>
-              <p className="text-lg md:text-xl text-gray-700 font-bold max-w-2xl">
-                InGenuityX helps students move from passive applications to real brand-backed proof of work.
-              </p>
-            </div>
-
-            {/* 2-Column Layout */}
-            <div className="grid lg:grid-cols-2 gap-12 items-stretch">
-              
-              {/* LEFT SIDE: Image Slider View */}
-              <div className="relative rounded-[2rem] overflow-hidden shadow-sm h-full min-h-[400px] group border border-gray-200">
-                
-                {/* Dynamically render images with fade transition */}
-                {featureImages.map((img, idx) => (
-                  <img 
-                    key={idx}
-                    src={img} 
-                    alt={`Slide ${idx + 1}`} 
-                    className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 group-hover:scale-105 ${
-                      idx === featureSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                    }`} 
-                  />
-                ))}
-                
-                {/* Bottom fade for indicator visibility */}
-                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent z-20 pointer-events-none"></div>
-                
-                {/* Dynamic Slider Indicators */}
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-                  {featureImages.map((_, idx) => (
-                    <div 
-                      key={idx}
-                      onClick={() => setFeatureSlide(idx)}
-                      className={`w-8 h-1.5 rounded-full transition-colors cursor-pointer ${
-                        idx === featureSlide ? 'bg-[#111]' : 'bg-[#D1CFC9] hover:bg-gray-400'
-                      }`}
-                    ></div>
-                  ))}
-                </div>
-              </div>
-
-              {/* RIGHT SIDE: 4 Cards */}
-              <div className="grid sm:grid-cols-2 gap-6">
-                {[
-                  { title: 'Real Brand Briefs', desc: 'Work on problems connected to actual companies, campaigns, and markets.' },
-                  { title: 'Proof-of-Work Portfolio', desc: 'Every submission becomes evidence of your thinking, creativity, and execution.' },
-                  { title: 'Shortlist Visibility', desc: 'Stand out through ideas, not just resume keywords.' },
-                  { title: 'Career Pathways', desc: 'Unlock internships, interviews, PPO conversations, and winner features.' }
-                ].map((item, index) => (
-                  <div key={index} className="p-8 rounded-[2rem] bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-center">
-                    <span className="text-[#E92A39] font-black text-xs block mb-4">0{index + 1}</span>
-                    <h4 className="text-xl font-black mb-3 text-[#111]">{item.title}</h4>
-                    <p className="text-gray-600 text-sm font-semibold leading-relaxed">{item.desc}</p>
+            {waitlistStatus !== 'success' ? (
+              <>
+                <p className="text-base md:text-2xl text-[#A1A1AA] mb-8 md:mb-10 max-w-xl font-bold animate-text-fade-up" style={{ animationDelay: '100ms' }}>
+                  Register before August 31st to get the first briefs the moment they drop.
+                </p>
+                <div id="waitlist-form" className="mt-4 md:mt-6 w-full scroll-mt-32 animate-text-fade-up" style={{ animationDelay: '200ms' }}>
+                  <div className="flex flex-col sm:flex-row gap-3 w-full max-w-lg">
+                    <input
+                      type="email"
+                      placeholder="Enter your email"
+                      value={waitlistEmail}
+                      onChange={(e) => { setWaitlistEmail(e.target.value); if (waitlistStatus === 'error') setWaitlistStatus('idle'); }}
+                      className={`flex-1 bg-black/40 backdrop-blur-md border ${waitlistStatus === 'error' ? 'border-[#E92A39]' : 'border-white/10'} text-white placeholder:text-[#71717A] px-5 py-3.5 md:px-6 md:py-4 rounded-full focus:outline-none focus:border-[#E92A39] font-bold text-sm md:text-base transition-colors shadow-inner`}
+                    />
+                    <button onClick={handleWaitlistJoin} disabled={waitlistStatus === 'submitting'} className="bg-[#E92A39] text-white px-8 py-3.5 md:py-4 rounded-full text-xs font-black uppercase tracking-widest shrink-0 hover:bg-[#ff3b4b] transition-colors disabled:opacity-60 shadow-lg">
+                      {waitlistStatus === 'submitting' ? 'Joining...' : 'Lock In'}
+                    </button>
                   </div>
-                ))}
+                </div>
+              </>
+            ) : (
+              // NEW QUEUE UI AFTER SIGNUP
+              <div id="waitlist-form" className="mt-6 md:mt-8 w-full max-w-xl bg-[#151515]/90 backdrop-blur-md border border-[#2A2A2E] rounded-[2rem] p-6 md:p-8 shadow-2xl animate-text-fade-up">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                  <h3 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
+                    <CheckCircle2 className="w-6 h-6 text-[#10B981]" /> You're locked in.
+                  </h3>
+                  <span className="bg-[#10B981]/10 text-[#10B981] px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-[#10B981]/20 w-fit">
+                    Rank #{waitlistRank.toLocaleString()}
+                  </span>
+                </div>
+                <p className="text-[#A1A1AA] text-sm md:text-base font-bold mb-6 leading-relaxed">
+                  The vault opens Aug 31st. Want early access? Move up <strong className="text-white">50 spots</strong> for every peer who joins using your link.
+                </p>
+                <div className="flex items-center gap-2 bg-[#0A0A0A] p-1.5 md:p-2 rounded-xl border border-[#2A2A2E]">
+                  <input 
+                    type="text" 
+                    readOnly 
+                    value={`ingenuityx.com/join?ref=ix_${waitlistEmail.split('@')[0] || 'user'}`} 
+                    className="bg-transparent text-[#71717A] text-xs md:text-sm font-mono flex-1 px-3 outline-none truncate"
+                  />
+                  <button 
+                    onClick={() => { 
+                      navigator.clipboard.writeText(`ingenuityx.com/join?ref=ix_${waitlistEmail.split('@')[0] || 'user'}`); 
+                      setCopied(true); setTimeout(() => setCopied(false), 2000); 
+                    }}
+                    className="bg-[#2A2A2E] hover:bg-[#3f3f46] text-white px-4 py-2.5 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest transition-colors flex items-center gap-2 shrink-0"
+                  >
+                    {copied ? <CheckCircle2 className="w-3.5 h-3.5"/> : <Copy className="w-3.5 h-3.5"/>}
+                    {copied ? 'Copied' : 'Copy Link'}
+                  </button>
+                </div>
               </div>
-
-            </div>
+            )}
           </div>
-        </ScrollReveal>
+        </div>
       </section>
 
-      {/* 5 THEMES SECTION */}
-      <section className="py-16 px-4 md:px-8 max-w-[1600px] mx-auto overflow-hidden relative z-10 mb-8">
-        <ScrollReveal direction="up">
-          <h3 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-8 text-black px-2">5 Themes. Pick your arena.</h3>
-        </ScrollReveal>
+      {/* 2. LIVE CHALLENGE TEASER STRIP */}
+      <section className="relative z-20 -mt-12 md:-mt-24 px-4 md:px-8 max-w-[1600px] mx-auto pb-12 md:pb-20">
+        <div className="flex items-center justify-between mb-4 px-1 md:px-2">
+          <p className="text-[10px] md:text-xs font-black text-[#A1A1AA] uppercase tracking-widest">Sneak Peek: Live in the Vault</p>
+          <div className="hidden md:flex gap-2">
+            <button onClick={() => scrollTrack(teaserScrollRef, 'left')} className="w-8 h-8 rounded-full border border-[#2A2A2E] bg-[#161616]/80 backdrop-blur-md flex items-center justify-center text-[#A1A1AA] hover:text-white transition-colors">←</button>
+            <button onClick={() => scrollTrack(teaserScrollRef, 'right')} className="w-8 h-8 rounded-full border border-[#2A2A2E] bg-[#161616]/80 backdrop-blur-md flex items-center justify-center text-[#A1A1AA] hover:text-white transition-colors">→</button>
+          </div>
+        </div>
         
-        <div className="flex overflow-x-auto hide-scrollbar gap-4 pb-6 md:grid md:grid-cols-5 md:gap-6 md:pb-0 items-stretch">
-          {categories.map((category, index) => (
-            <div key={index} className="min-w-[280px] md:min-w-0 shrink-0 flex flex-col">
-              <ScrollReveal direction="up" delay={index * 100} width="100%" className="flex-1 flex flex-col">
-                <Link to={category.route} className={`flex-1 flex flex-col p-8 rounded-[2.5rem] transition-transform duration-300 hover:scale-[1.02] relative shadow-sm ${category.colors}`}>
-                  <h4 className="text-2xl font-bold tracking-tight mb-4">{category.title}</h4>
-                  <p className={`text-[15px] italic mb-6 font-medium ${category.quoteColor}`}>"{category.quote.replace(/"/g, '')}"</p>
-                  <p className={`text-[14px] leading-relaxed font-medium ${category.taglineColor}`}>{category.tagline}</p>
-                </Link>
-              </ScrollReveal>
+        <div ref={teaserScrollRef} className="flex overflow-x-auto hide-scrollbar gap-3 md:gap-4 pb-4 snap-x snap-mandatory">
+          {opportunities.slice(0, 5).map((opp, i) => (
+            <div key={i} className="w-[80vw] sm:w-[320px] shrink-0 snap-center relative rounded-2xl overflow-hidden bg-[#161616]/80 backdrop-blur-sm border border-[#2A2A2E] h-[180px] md:h-[220px] group cursor-pointer shadow-lg" onClick={scrollToWaitlist}>
+              <img src={opp.bgImage || PLACEHOLDER_BG} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 md:group-hover:opacity-60 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#151515] via-[#151515]/80 to-transparent" />
+              
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-[2px] opacity-0 md:group-hover:opacity-100 transition-all duration-300 z-20">
+                <Lock className="w-6 h-6 md:w-8 md:h-8 text-white mb-2" />
+                <span className="bg-[#E92A39] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">Unlocks Aug 31</span>
+              </div>
+
+              <div className="relative z-10 p-4 md:p-5 h-full flex flex-col justify-end">
+                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-[#A1A1AA] mb-1 md:mb-2">{opp.company}</span>
+                <h4 className="text-lg md:text-xl font-black text-white leading-tight mb-2 truncate">{opp.title}</h4>
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] md:text-[10px] font-bold px-2 py-1 rounded bg-white/10 text-white/90 border border-white/5">{opp.type}</span>
+                  <span className="text-[9px] md:text-[10px] font-bold text-[#10b981]">{opp.points?.split('+')[0] || 'Reward'}</span>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* THE CHALLENGE VAULT */}
-      <section id="opportunities" className="py-24 relative overflow-hidden z-10 bg-[#FFF8E7] rounded-[3rem] mx-2 md:mx-4 mb-16 shadow-inner">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-8">
-          <ScrollReveal direction="up">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
-              <div>
-                <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4 text-black">The Challenge Vault</h2>
-                <p className="text-lg md:text-xl text-gray-800 max-w-2xl font-bold">Live brand briefs, competitions, projects, and PPO-linked opportunities. Pick a live brief. Build your proof. Get noticed.</p>
-              </div>
-              
-              <div className="flex items-center bg-white border border-gray-200 shadow-sm rounded-full px-5 py-3 w-full md:w-[400px]">
-                <Search className="w-5 h-5 text-gray-400 mr-3" />
-                <input type="text" placeholder="Search challenges, brands..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent text-sm text-black font-bold focus:outline-none w-full placeholder:text-gray-400" />
-              </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-              <div className="flex overflow-x-auto hide-scrollbar gap-2 pb-2 px-1 w-full md:w-auto">
-                {filters.map(filter => (
-                  <button key={filter} onClick={() => setActiveFilter(filter)} className={`whitespace-nowrap px-6 py-2 rounded-full text-xs font-bold transition-all ${activeFilter === filter ? 'bg-[#E92A39] text-white shadow-md scale-105' : 'bg-white border border-gray-200 text-gray-600 hover:border-[#3BA8E7] hover:text-[#3BA8E7] hover:bg-[#3BA8E7]/5'}`}>
-                    {filter}
-                  </button>
-                ))}
-              </div>
-
-              {/* SCROLL BUTTON FOR VAULT */}
-              {!showAllVault && filteredOpportunities.length > 4 && (
-                <div className="hidden md:flex items-center gap-2 shrink-0 pr-2">
-                  <button onClick={() => scrollTrack(vaultScrollRef, 'left')} className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center font-black text-gray-600 hover:text-black hover:bg-gray-50 transition-all shadow-sm active:scale-95">←</button>
-                  <button onClick={() => scrollTrack(vaultScrollRef, 'right')} className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center font-black text-gray-600 hover:text-black hover:bg-gray-50 transition-all shadow-sm active:scale-95">→</button>
-                </div>
-              )}
-            </div>
-          </ScrollReveal>
-
-          {isLoadingOpps ? (
-             <div className="flex flex-col items-center justify-center py-32">
-               <div className="w-8 h-8 border-4 border-gray-200 border-t-[#2E73E6] rounded-full animate-spin mb-6"></div>
-               <p className="text-sm font-bold tracking-widest uppercase text-gray-800">Loading live challenges...</p>
-             </div>
-          ) : filteredOpportunities.length === 0 ? (
-            <ScrollReveal direction="up">
-              <div className="text-center py-32 bg-white border border-gray-200 rounded-[2rem] shadow-sm">
-                <p className="text-gray-800 text-sm font-bold">No matches yet. Try another theme or check back for new challenge drops.</p>
-              </div>
-            </ScrollReveal>
-          ) : null}
-
-          {/* Dynamic Container: Horizontal Slider (default) OR Grid View (if toggled) */}
-          <div 
-            ref={vaultScrollRef}
-            className={showAllVault ? "grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch" : "flex overflow-x-auto hide-scrollbar gap-4 md:gap-6 pb-8 snap-x snap-mandatory items-stretch"}
-          >
-            {displayedOpportunities.map((opp, i) => {
-              // Check if it has a custom background image uploaded, otherwise use universal abstract background
-              const cardBg = opp.bgImage || PLACEHOLDER_BG;
-
-              return (
-                <div 
-                  key={opp.id} 
-                  className={!showAllVault ? "w-[85vw] sm:w-[320px] md:w-[340px] shrink-0 snap-center flex flex-col" : "w-full flex flex-col"}
-                >
-                  <ScrollReveal direction="up" delay={(i % 4) * 100} width="100%" className="flex-1 flex flex-col">
-                    <div 
-                      onClick={() => navigate(`/opportunity/${opp.id}`)}
-                      className="relative rounded-[2.5rem] shadow-sm transition-all duration-300 cursor-pointer flex flex-col flex-1 min-h-[560px] group hover:shadow-2xl overflow-hidden bg-black"
-                    >
-                      {/* UNIVERSAL BACKGROUND IMAGE (with Blur Fallback to prevent cropping) */}
-                      <div className="absolute inset-0 z-0 transition-transform duration-700 group-hover:scale-105">
-                        {/* Blurred backing to fill ratio gaps */}
-                        <img src={cardBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-60 blur-xl scale-110" />
-                        {/* Contained foreground image so logos never crop */}
-                        <img src={cardBg} alt="Background" className="absolute inset-0 w-full h-full object-contain object-top" />
-                      </div>
-                      
-                      {/* Default Bottom Gradient (for the default Explore button visibility) */}
-                      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 to-transparent z-0 transition-opacity duration-300 group-hover:opacity-0 hidden md:block"></div>
-
-                      {/* HOVER OVERLAY (Dark Frosted Glass) */}
-                      <div className="absolute inset-0 bg-black/70 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-md hidden md:block"></div>
-
-                      {/* --- CONTENT (Desktop: Hover Reveal / Mobile: Always Visible) --- */}
-                      
-                      {/* 1. DESKTOP ONLY HOVER REVEAL */}
-                      <div className="hidden md:flex relative z-10 flex-col h-full p-6 justify-end transition-all duration-500 opacity-0 translate-y-8 group-hover:opacity-100 group-hover:translate-y-0">
-                        {/* Top Badges */}
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex gap-2 flex-wrap">
-                            <span className="inline-block px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-white/20 text-white backdrop-blur-md border border-white/10 shadow-sm">
-                              {opp.type}
-                            </span>
-                            {opp.points?.includes('PPO') && (
-                              <span className="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1.5 rounded-full bg-white/20 text-white backdrop-blur-md border border-white/10 shadow-sm">
-                                PPO Pathway
-                              </span>
-                            )}
-                            <span className="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1.5 rounded-full bg-[#10b981]/80 text-white backdrop-blur-md shadow-sm">
-                              Opens 27th July
-                            </span>
-                          </div>
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold transition-colors shrink-0 ml-2 bg-white/20 text-white hover:bg-white hover:text-black backdrop-blur-md shadow-sm">↗</div>
-                        </div>
-
-                        {/* Title */}
-                        <h3 className="text-3xl font-black tracking-tight mb-4 leading-tight text-white drop-shadow-md">{opp.title}</h3>
-                        
-                        {/* COMPANY LOGO & NAME */}
-                        <div className="flex items-center gap-4 mb-6">
-                          <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 bg-white shadow-md flex items-center justify-center border border-white/20">
-                            {opp.logoUrl ? (
-                              <img src={opp.logoUrl} alt={opp.company} className="w-full h-full object-contain scale-[1.15]" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-lg font-black text-[#111] bg-gray-50">
-                                {opp.company ? opp.company.charAt(0).toUpperCase() : 'X'}
-                              </div>
-                            )}
-                          </div>
-                          <p className="text-base font-bold m-0 leading-none text-white drop-shadow-sm">
-                            {opp.company}
-                            <span className="ml-2 text-xs inline-flex items-center text-[#3BA8E7]">
-                              ✓ <span className="uppercase tracking-wider ml-1 text-[10px] text-white/80">Verified</span>
-                            </span>
-                          </p>
-                        </div>
-
-                        {/* Team Size & Level */}
-                        <div className="flex gap-2 mb-4">
-                          <span className="text-[11px] font-bold px-3 py-1.5 rounded-full border bg-white/10 text-white/90 border-white/20 backdrop-blur-sm shadow-sm">Team 1-4</span>
-                          <span className="text-[11px] font-bold px-3 py-1.5 rounded-full border bg-white/10 text-white/90 border-white/20 backdrop-blur-sm shadow-sm">Beginner Friendly</span>
-                        </div>
-
-                        {/* Reward & Meta box */}
-                        <div className="flex flex-col gap-1 mb-6 p-5 rounded-2xl border bg-white/10 border-white/20 backdrop-blur-md shadow-inner">
-                          <span className="text-lg font-black text-white drop-shadow-sm">{opp.points}</span>
-                          <span className="text-[10px] font-bold uppercase tracking-widest mt-1 text-white/70">{opp.duration} • {opp.deadline}</span>
-                        </div>
-                        
-                        {/* CTA Button */}
-                        <button onClick={(e) => { e.stopPropagation(); document.getElementById('waitlist-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }} className="w-full text-xs font-extrabold flex items-center justify-center gap-2 px-5 py-4 rounded-xl shadow-lg transition-all duration-300 bg-[#E92A39] hover:bg-[#ff3b4b] text-white mt-auto">
-                          ⏳ Join Waitlist to Apply
-                        </button>
-
-                        {/* Description Preview */}
-                        <p className="text-xs line-clamp-2 leading-relaxed mt-4 font-medium text-white/70">{opp.description}</p>
-                      </div>
-
-                      {/* 2. MOBILE ONLY PERSISTENT CONTENT */}
-                      <div className="absolute inset-x-0 bottom-0 p-6 z-10 md:hidden flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/40 to-transparent pt-32">
-                        <h3 className="text-2xl font-black text-white mb-1 leading-tight drop-shadow-sm">{opp.title}</h3>
-                        <p className="text-white/80 text-sm font-bold mb-5 drop-shadow-sm">{opp.company}</p>
-                        <button onClick={(e) => { e.stopPropagation(); document.getElementById('waitlist-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }} className="w-full text-xs font-extrabold flex items-center justify-center gap-2 px-5 py-4 rounded-xl shadow-lg transition-all duration-300 bg-[#E92A39] hover:bg-[#ff3b4b] text-white mt-auto">
-                          ⏳ Join Waitlist to Apply
-                        </button>
-                      </div>
-
-                      {/* --- DEFAULT VISIBLE STATE (Desktop Idle Button) --- */}
-                      <div className="absolute inset-x-6 bottom-6 z-10 transition-all duration-500 opacity-100 group-hover:opacity-0 group-hover:translate-y-8 pointer-events-none hidden md:block">
-                        <button onClick={(e) => { e.stopPropagation(); document.getElementById('waitlist-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }} className="w-full text-sm font-extrabold flex items-center justify-center gap-2 px-4 py-4 rounded-xl shadow-2xl transition-all duration-300 bg-[#E92A39] text-white pointer-events-auto hover:bg-[#ff3b4b]">
-                          ⏳ Join Waitlist to Apply
-                        </button>
-                      </div>
-
-                    </div>
-                  </ScrollReveal>
-                </div>
-              );
-            })}
+      {/* 3. PICK YOUR LANE */}
+      <section className="py-12 md:py-16 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-[#2A2A2E]">
+        <ScrollReveal>
+          <div className="mb-8 md:mb-10 text-left">
+            <h3 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-2 md:mb-4">Find your vibe</h3>
+            <p className="text-[#A1A1AA] font-bold text-sm md:text-lg">No endless scrolling. Pick your field to see the live briefs.</p>
           </div>
-
-          {/* DYNAMIC VIEW ALL / HIDE BUTTONS */}
-          {filteredOpportunities.length > 4 && (
-            <ScrollReveal direction="up" delay={200}>
-              <div className="flex justify-center mt-10">
-                {!showAllVault ? (
-                  <button 
-                    onClick={() => setShowAllVault(true)} 
-                    className="bg-[#111] hover:bg-black text-white px-8 py-4 rounded-full font-black text-sm uppercase tracking-widest transition-all hover:scale-105 shadow-md flex items-center gap-2"
-                  >
-                    View All {filteredOpportunities.length} Opportunities →
-                  </button>
-                ) : (
-                  <button 
-                    onClick={() => { 
-                      setShowAllVault(false);
-                      document.getElementById('opportunities')?.scrollIntoView({ behavior: 'smooth' });
-                    }} 
-                    className="bg-white border border-gray-200 text-[#111] hover:bg-gray-50 px-8 py-4 rounded-full font-black text-sm uppercase tracking-widest transition-all hover:scale-105 shadow-sm flex items-center gap-2"
-                  >
-                    ← Collapse Vault
-                  </button>
-                )}
-              </div>
-            </ScrollReveal>
-          )}
-
-        </div>
-      </section>
-
-      {/* STUDENT CONFESSIONS (VIBRANT WIDGETS) */}
-      <section className="py-24 px-4 md:px-8 border-t border-gray-200 overflow-hidden relative z-10" data-testid="confessions-section">
-        <div className="max-w-[1600px] mx-auto relative z-10">
-          <ScrollReveal direction="left">
-            <div className="mb-16 max-w-4xl">
-              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-6 uppercase leading-tight text-black">We asked 130+ Gen-Z students what's actually going on.</h2>
-            </div>
-          </ScrollReveal>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {confessions.map((confession, index) => {
-              const currentStyle = confessionStyles[index % confessionStyles.length];
-              
-              return (
-                <ScrollReveal key={index} direction="scale" delay={index * 100}>
-                  <div className={`${currentStyle.bg} relative p-8 rounded-[2.5rem] shadow-sm hover:shadow-md transition-transform duration-300 hover:-translate-y-1 h-full flex flex-col group`}>
-                    <span className={`text-4xl font-serif leading-none absolute top-6 left-6 opacity-30 ${currentStyle.text}`}>"</span>
-                    <p className={`text-lg font-bold tracking-tight mb-8 relative z-10 pt-8 flex-grow ${currentStyle.text}`}>{confession.text.replace(/"/g, '')}</p>
-                    <div className="flex flex-wrap gap-2 relative z-10 mt-auto">
-                      {confession.tags.map((tag, tagIndex) => (
-                        <span key={tagIndex} className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full ${currentStyle.tagBg}`}>{tag}</span>
-                      ))}
+        </ScrollReveal>
+        
+        {/* Mobile: Horizontal Scroll. Desktop: Slanted Accordion */}
+        <div className="flex overflow-x-auto md:overflow-visible hide-scrollbar flex-row gap-3 md:gap-4 h-[220px] md:h-[450px] snap-x snap-mandatory pb-4 md:pb-0">
+          {['Marketing', 'Tech', 'Design', 'Sustainability', 'Innovation'].map((catName, i) => {
+            const catColor = CATEGORY_COLORS[catName] || '#FAFAFA';
+            const count = opportunities.filter(o => o.category === catName).length;
+            const data = CATEGORY_DATA[catName];
+            
+            return (
+              <ScrollReveal key={i} delay={i * 50} className="w-[75vw] sm:w-[300px] md:w-auto shrink-0 snap-center md:flex-1 md:min-w-0 transition-all duration-500 ease-out md:hover:flex-[2.5]">
+                <div 
+                  onClick={() => { setActiveFilter(catName); document.getElementById('opportunities')?.scrollIntoView({ behavior: 'smooth' }); }}
+                  className="relative h-full w-full overflow-hidden group cursor-pointer transition-all duration-500 ease-out md:transform md:-skew-x-6 rounded-2xl md:rounded-2xl border border-[#2A2A2E] hover:border-transparent"
+                >
+                  <div className="absolute md:inset-[-20%] md:w-[140%] inset-0 w-full h-full md:transform md:skew-x-6 pointer-events-none">
+                    <img src={data.img} alt={catName} className="absolute inset-0 w-full h-full object-cover opacity-40 md:group-hover:scale-110 transition-transform duration-700 ease-out" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#151515] via-black/40 md:via-black/20 to-transparent md:group-hover:opacity-0 transition-opacity duration-300"></div>
+                    
+                    {/* Staggered Step Fill */}
+                    <div className="hidden md:block absolute inset-0 overflow-hidden z-10">
+                       <div className="absolute bottom-0 left-0 w-[33.5%] h-full translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" style={{ backgroundColor: catColor }}></div>
+                       <div className="absolute bottom-0 left-[33.3%] w-[33.5%] h-full translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out delay-75" style={{ backgroundColor: catColor }}></div>
+                       <div className="absolute bottom-0 left-[66.6%] w-[33.5%] h-full translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out delay-150" style={{ backgroundColor: catColor }}></div>
                     </div>
                   </div>
-                </ScrollReveal>
-              );
-            })}
-          </div>
+
+                  {/* Text Content */}
+                  <div className="absolute inset-0 z-20 flex flex-col justify-end p-5 md:p-8 md:transform md:skew-x-6 pointer-events-none">
+                    {/* Default View */}
+                    <div className="md:absolute md:bottom-6 md:left-8 transition-all duration-300 md:group-hover:opacity-0 md:group-hover:translate-y-4">
+                      <h4 className="text-2xl md:text-xl lg:text-3xl font-black text-white uppercase tracking-widest drop-shadow-lg" style={{ color: catColor }}>
+                        {catName}
+                      </h4>
+                      <p className="text-[#A1A1AA] text-xs font-bold uppercase tracking-widest mt-1 bg-black/60 md:bg-black/40 px-2 py-1 w-fit rounded">{count} Live</p>
+                    </div>
+
+                    {/* Desktop Hover Reveal */}
+                    <div className="hidden md:flex opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 delay-200 flex-col items-start h-full justify-center pl-2 md:pl-6 w-[120%] md:w-full">
+                      <h4 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 tracking-tight drop-shadow-lg">{catName}</h4>
+                      <p className="text-white/90 text-sm md:text-base font-semibold mb-6 max-w-[220px] md:max-w-sm leading-relaxed drop-shadow-md">{data.desc}</p>
+                      <span className="bg-black/30 backdrop-blur-sm border border-white/20 text-white px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span> {count} Live Briefs
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </ScrollReveal>
+            );
+          })}
         </div>
       </section>
 
-      {/* HR INTERVIEW AURA GUIDE */}
-      <section className="py-32 px-4 md:px-8 overflow-hidden relative z-10 bg-[#FFF8E5]" data-testid="hr-section">
-        <div className="max-w-[1600px] mx-auto relative z-10">
-          <ScrollReveal direction="up">
-            <div className="text-center mb-20 max-w-3xl mx-auto">
-              <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 text-[#111]">HR Interview Aura Guide.</h2>
-              <p className="text-xl text-[#111]/70 font-bold">Mistakes to avoid. Crimes against your own career. A PSA.</p>
+      {/* 4. WHAT'S ACTUALLY ON THE LINE */}
+      <section className="relative w-full py-16 md:py-24 px-4 md:px-8 border-y border-[#2A2A2E] overflow-hidden">
+        {/* Background Image & Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img src={PLACEHOLDER_BG} alt="Rewards Background" className="w-full h-full object-cover opacity-20 mix-blend-luminosity" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#151515] via-[#151515]/80 to-[#151515]"></div>
+        </div>
+
+        <div className="relative z-10 max-w-[1600px] mx-auto">
+          <ScrollReveal>
+            <div className="text-center mb-10 md:mb-16">
+              <h2 className="text-3xl md:text-6xl font-black tracking-tight text-white mb-3 md:mb-4">Earn More Than a Certificate</h2>
+              <p className="text-[#A1A1AA] font-bold text-sm md:text-lg max-w-2xl mx-auto px-4">No generic certificates. These are the actual rewards tied to live briefs in the vault right now.</p>
             </div>
           </ScrollReveal>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {hrMistakes.map((mistake, index) => (
-              <ScrollReveal key={index} direction="up" delay={(index % 3) * 100}>
-                <div className="h-full bg-[#FBFCF4] shadow-sm p-8 rounded-[2.5rem] hover:shadow-lg transition-all duration-300 group flex flex-col hover:-translate-y-1">
-                  <div className="text-5xl font-black tracking-tighter text-[#E92A39] mb-6 w-fit">{mistake.percent}</div>
-                  <h4 className="text-xl font-extrabold tracking-tight mb-4 text-[#111]">{mistake.title}</h4>
-                  {mistake.quote && <p className="text-[#111]/70 italic text-sm mb-6 pb-6 border-b border-[#111]/10 font-semibold">"{mistake.quote.replace(/"/g, '')}"</p>}
-                  {mistake.details && <div className="text-[11px] text-[#111]/80 mb-6 whitespace-pre-line font-bold bg-white/40 p-4 rounded-2xl flex-grow border border-white/50">{mistake.details}</div>}
-                  <div className="mt-auto pt-4">
-                    {mistake.punchline && <p className="text-sm font-bold text-[#E92A39] flex items-start gap-2"><span>⚠️</span> {mistake.punchline}</p>}
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {uniqueRewards.map((reward, i) => (
+              <ScrollReveal key={i} delay={i * 50}>
+                <div className="relative bg-[#0A0A0A]/80 backdrop-blur-sm border border-[#2A2A2E] rounded-[1.5rem] md:rounded-[2rem] text-center flex flex-col items-center justify-center min-h-[140px] md:min-h-[200px] hover:border-[#E92A39]/50 transition-colors overflow-hidden group">
+                  <img src={REWARD_IMAGES[i % REWARD_IMAGES.length]} alt="" className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-80 group-hover:scale-110 transition-all duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/80 to-transparent"></div>
+                  <div className="relative z-10 p-6 md:p-8 w-full flex flex-col items-center justify-center h-full">
+                    <h4 className="text-xl md:text-2xl font-black text-white mb-1 md:mb-2">{reward.includes('+') ? reward.split('+')[0].trim() : reward}</h4>
+                    {reward.includes('+') && <span className="text-xs md:text-sm font-bold text-[#E92A39]">+{reward.split('+')[1].trim()}</span>}
                   </div>
                 </div>
               </ScrollReveal>
             ))}
+            {uniqueRewards.length < 4 && (
+              <ScrollReveal delay={200}>
+                <div className="bg-[#1C1C1E]/80 backdrop-blur-sm border border-dashed border-[#2A2A2E] p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] text-center flex flex-col items-center justify-center min-h-[140px] md:min-h-[200px]">
+                  <h4 className="text-sm md:text-xl font-bold text-[#71717A] mb-2">+ More dropping launch day</h4>
+                </div>
+              </ScrollReveal>
+            )}
           </div>
         </div>
       </section>
 
-      {/* --- NEW CORPORATE ARCADE SECTION --- */}
-      <section className="py-24 px-4 md:px-8 relative border-t border-gray-200 overflow-hidden z-10 bg-[#FAFCFC]">
-        <div className="max-w-[1600px] mx-auto relative z-10">
-          <ScrollReveal direction="up">
-            <div className="text-center mb-16 max-w-3xl mx-auto">
-              <h2 className="text-4xl md:text-6xl font-extrabold text-black mb-4">The Corporate Arcade</h2>
-              <p className="text-xl text-gray-600 font-bold leading-relaxed">Take a break. Play the game.</p>
-            </div>
-          </ScrollReveal>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <ScrollReveal direction="up" delay={0}>
-              <AuraCalculator />
-            </ScrollReveal>
-            <ScrollReveal direction="up" delay={150}>
-              <FlagGame />
-            </ScrollReveal>
-            <ScrollReveal direction="up" delay={300}>
-              <WhackAYapper />
-            </ScrollReveal>
-          </div>
-        </div>
-      </section>
-
-      {/* THE WALL (PRE-LAUNCH REFRAME) */}
-      <section className="py-32 px-4 md:px-8 border-t border-gray-200 relative overflow-hidden z-10" data-testid="wall-section">
-        <div className="max-w-3xl mx-auto relative z-10">
-          <ScrollReveal direction="up">
-            <div className="text-center mb-12">
-              <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 text-black">The Wall opens 27th July.</h2>
-              <p className="text-xl text-gray-600 leading-relaxed font-bold">Fake internships? AI fear? Toxic hustle culture? The vault unlocks soon. Be the first to drop your lore.</p>
-            </div>
-
-            <div className="bg-gray-50 border border-gray-200 p-10 md:p-16 rounded-[3rem] text-center shadow-sm relative overflow-hidden">
-              <div className="absolute inset-0 bg-white/40 backdrop-blur-sm z-0"></div>
-              <div className="relative z-10">
-                <span className="text-5xl block mb-6 drop-shadow-sm">🤫</span>
-                <h3 className="text-2xl font-extrabold text-black mb-3">Submissions are currently locked.</h3>
-                <p className="text-gray-500 font-bold text-sm">Join the waitlist to get notified the second the live feed opens.</p>
+      {/* 5. THE CHALLENGE VAULT (REFINED HOVER ACTION) */}
+      <section id="opportunities" className="py-16 md:py-24 relative overflow-hidden bg-transparent border-b border-[#2A2A2E] scroll-mt-10">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8">
+          <ScrollReveal>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8 mb-8 md:mb-12">
+              <div>
+                <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-2 md:mb-4 text-white">The Challenge Vault</h2>
+                <p className="text-[#A1A1AA] text-sm md:text-base font-bold">Pick a brief. Build your proof. Get noticed.</p>
+              </div>
+              <div className="flex items-center bg-[#1C1C1E]/80 backdrop-blur-md border border-[#2A2A2E] rounded-full px-4 py-2.5 md:px-5 md:py-3 w-full md:w-[350px]">
+                <Search className="w-4 h-4 md:w-5 md:h-5 text-[#71717A] mr-2 md:mr-3" />
+                <input type="text" placeholder="Search brands or briefs..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent text-sm text-white focus:outline-none w-full placeholder:text-[#71717A]" />
               </div>
             </div>
+
+            <div className="flex overflow-x-auto hide-scrollbar gap-2 pb-4 md:pb-6 w-full">
+              {['All', 'Marketing', 'Tech', 'Design', 'Sustainability', 'Innovation'].map(filter => (
+                <button 
+                  key={filter} 
+                  onClick={() => setActiveFilter(filter)} 
+                  className={`whitespace-nowrap px-4 py-1.5 md:px-6 md:py-2 rounded-full text-[10px] md:text-xs font-bold transition-all border ${activeFilter === filter ? 'bg-[#E92A39] border-[#E92A39] text-white' : 'bg-[#151515]/80 backdrop-blur-sm border-[#2A2A2E] text-[#A1A1AA] hover:border-gray-500 hover:text-white'}`}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
           </ScrollReveal>
+
+          {isLoadingOpps ? (
+             <div className="text-center py-20 md:py-32 text-[#71717A] font-bold text-xs md:text-sm uppercase tracking-widest">Loading...</div>
+          ) : filteredOpportunities.length === 0 ? (
+            <div className="text-center py-20 md:py-32 border border-[#2A2A2E] rounded-2xl bg-[#151515]/80 backdrop-blur-sm">
+              <p className="text-[#A1A1AA] text-sm font-bold">No matches found in this lane.</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              {filteredOpportunities.map((opp, i) => {
+                const catColor = CATEGORY_COLORS[opp.category] || '#E92A39';
+                return (
+                  <ScrollReveal key={opp.id} delay={(i % 4) * 50}>
+                    <div 
+                      className="relative rounded-[2.5rem] bg-[#161616] border border-[#2A2A2E] h-[540px] flex flex-col overflow-hidden group cursor-pointer shadow-sm"
+                      onClick={scrollToWaitlist}
+                    >
+                      {/* Background Image */}
+                      <img src={opp.bgImage || PLACEHOLDER_BG} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+
+                      {/* Default State (Visible when NOT hovered) */}
+                      <div className="absolute inset-0 z-10 flex flex-col justify-between p-6 md:p-8 transition-opacity duration-500 group-hover:opacity-0">
+                        {/* Top Left Tag */}
+                        <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white w-fit shadow-sm flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: catColor }}></span>
+                          {opp.category}
+                        </span>
+
+                        {/* Bottom Gradient & Content */}
+                        <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/80 to-transparent pointer-events-none" />
+                        <div className="relative z-10 w-full mt-auto">
+                           <h4 className="text-3xl font-black text-white mb-6 leading-tight">{opp.title}</h4>
+                           <button className="w-full bg-[#1C1C1E] border border-[#2A2A2E] text-white py-4 rounded-xl text-sm font-black flex justify-center items-center gap-2 shadow-lg backdrop-blur-md">
+                              Hover to view brief
+                           </button>
+                        </div>
+                      </div>
+
+                      {/* Hover Overlay (Dark Blur) */}
+                      <div className="absolute inset-0 bg-black/80 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
+
+                      {/* Hover Content Area (Exactly matching the image) */}
+                      <div className="absolute inset-0 z-20 p-6 md:p-8 flex flex-col opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500">
+                        
+                        {/* Top Header */}
+                        <div className="flex justify-between items-start mb-6">
+                          <div className="flex flex-col gap-2">
+                            <div className="flex flex-wrap gap-2">
+                              <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full bg-white/10 border border-white/5 text-white/90 shadow-sm">{opp.type}</span>
+                              <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full bg-white/10 border border-white/5 text-white/90 shadow-sm">PPO Pathway</span>
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full bg-[#10B981] text-white w-fit shadow-sm">Opens 31st Aug</span>
+                          </div>
+                          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white backdrop-blur-md border border-white/5 shadow-sm">↗</div>
+                        </div>
+
+                        {/* Title & Company */}
+                        <h3 className="text-3xl md:text-4xl font-black text-white leading-tight mb-6 drop-shadow-md">{opp.title}</h3>
+                        
+                        <div className="flex items-center gap-3 mb-6">
+                           <div className="w-12 h-12 rounded-full bg-white p-1.5 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+                             {opp.logoUrl ? <img src={opp.logoUrl} alt={opp.company} className="w-full h-full object-contain" /> : <span className="text-[#111] font-black text-xl">{opp.company.charAt(0)}</span>}
+                           </div>
+                           <div className="flex items-center gap-1.5 text-white font-bold text-lg drop-shadow-md">
+                             {opp.company} <CheckCircle2 className="w-5 h-5 text-[#3BA8E7]" strokeWidth={3} /> <span className="text-[10px] uppercase tracking-widest text-white/60 font-black ml-1">Verified</span>
+                           </div>
+                        </div>
+
+                        {/* Tags */}
+                        <div className="flex gap-2 mb-6">
+                          <span className="text-[11px] font-bold px-4 py-2 rounded-full border border-white/20 text-white/90 bg-white/5 backdrop-blur-sm">Team 1-4</span>
+                          <span className="text-[11px] font-bold px-4 py-2 rounded-full border border-white/20 text-white/90 bg-white/5 backdrop-blur-sm">Beginner Friendly</span>
+                        </div>
+
+                        {/* Reward Box */}
+                        <div className="bg-white/5 border border-white/20 rounded-2xl p-5 mb-auto backdrop-blur-sm">
+                          <h4 className="text-2xl font-black text-white drop-shadow-sm mb-1">{opp.points.split('+')[0].trim()}</h4>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-[#A1A1AA]">{opp.duration} • {opp.deadline}</p>
+                        </div>
+
+                        {/* CTA & Desc */}
+                        <button className="w-full bg-[#E92A39] text-white py-4 rounded-xl text-sm font-black flex justify-center items-center gap-2 shadow-lg mb-4 hover:bg-[#ff3b4b] transition-colors mt-6">
+                          ⏳ Join Waitlist to Apply
+                        </button>
+                        <p className="text-[#A1A1AA] text-xs font-medium line-clamp-2 leading-relaxed drop-shadow-sm">{opp.description}</p>
+                      </div>
+                    </div>
+                  </ScrollReveal>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* --- DUAL CTA SECTION --- */}
-      <section className="py-16 px-4 md:px-8 max-w-[1600px] mx-auto relative z-10">
-        <ScrollReveal direction="up">
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Student CTA */}
-            <div className="bg-[#2E73E6] rounded-[2.5rem] p-10 md:p-14 text-white flex flex-col justify-center items-start shadow-sm hover:shadow-lg transition-all duration-300">
-              <h3 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">Ready to prove yourself?</h3>
-              <p className="text-white/80 font-bold mb-8 max-w-md text-lg">Stop waiting for permission. Take on real-world brand challenges and build your proof-of-work.</p>
-              <button onClick={() => document.getElementById('opportunities')?.scrollIntoView({ behavior: 'smooth' })} className="bg-white text-[#2E73E6] px-8 py-4 rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform shadow-md">
-                Explore Challenges
-              </button>
-            </div>
+      {/* 6. 4 AM IS WHEN YOU FIND OUT — Artifact Wall */}
+      <section className="py-16 md:py-28 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-[#2A2A2E] relative overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#E92A39]/5 rounded-full blur-[120px] pointer-events-none" />
 
-            {/* Brand CTA */}
-            <div className="bg-[#FDE25D] rounded-[2.5rem] p-10 md:p-14 text-[#111] flex flex-col justify-center items-start shadow-sm hover:shadow-lg transition-all duration-300">
-              <h3 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">Need fresh perspectives?</h3>
-              <p className="text-[#111]/70 font-bold mb-8 max-w-md text-lg">Tap into India's sharpest Gen-Z minds. Drop a challenge and discover your next superstar.</p>
-              <Link to="/contact" className="bg-[#111] text-white px-8 py-4 rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform shadow-md">
-                Partner With Us
-              </Link>
+        <ScrollReveal>
+          <div className="mb-12 md:mb-20 text-left">
+            
+            <h2 className="text-3xl md:text-6xl font-black tracking-tight text-white mb-3 md:mb-4 max-w-3xl">
+              Because 4 AM is when you find out what you're made of.
+            </h2>
+            <p className="text-[#A1A1AA] font-bold text-sm md:text-xl max-w-2xl">
+              Every brief has a version of this night. Here's what one actually looked like.
+            </p>
+          </div>
+        </ScrollReveal>
+
+        {/* SCATTERED PROOF WALL */}
+        <div className="relative grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 md:gap-y-12">
+
+          {/* Chat log — team panic, 3 hours out */}
+          <ScrollReveal className="md:col-span-5 md:col-start-1" delay={0}>
+            <PinnedCard rotate={-2} className="relative overflow-hidden md:-mt-2 p-0">
+              <div 
+                className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" 
+                style={{ 
+                  backgroundImage: `url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              />
+              <div className="p-4 md:p-5 relative z-10">
+                <div className="flex items-center gap-2 mb-3 text-[#71717A] bg-[#161616]/90 backdrop-blur-sm border border-[#2A2A2E] px-3 py-1.5 rounded-full w-fit shadow-sm">
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Team Ironclad — group chat</span>
+                </div>
+                <div className="space-y-2 text-sm font-semibold flex flex-col">
+                  <div className="bg-[#202C33] border border-[#2A2A2E] rounded-2xl rounded-tl-sm px-4 py-2.5 w-fit max-w-[85%] text-[#FAFAFA] shadow-sm">
+                    ok the deck is done but slide 6 makes no sense at 2am energy
+                  </div>
+                  <div className="bg-[#202C33] border border-[#2A2A2E] rounded-2xl rounded-tl-sm px-4 py-2.5 w-fit max-w-[85%] text-[#FAFAFA] shadow-sm">
+                    rebuilding it now don't touch anything
+                  </div>
+                  <div className="bg-[#005C4B] border border-[#2A2A2E] rounded-2xl rounded-tr-sm px-4 py-2.5 w-fit max-w-[85%] text-white ml-auto text-right shadow-sm">
+                    someone get chai. this is happening
+                  </div>
+                </div>
+              </div>
+            </PinnedCard>
+          </ScrollReveal>
+
+          {/* Terminal — countdown to deadline via commit log */}
+          <ScrollReveal className="md:col-span-6 md:col-start-7" delay={80}>
+            <PinnedCard rotate={1.5} className="p-4 md:p-5 md:mt-6 font-mono">
+              <div className="flex items-center gap-2 mb-3 text-[#71717A]">
+                <Terminal className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-black uppercase tracking-widest">solid-shift-submission — main</span>
+              </div>
+              <div className="text-xs md:text-sm space-y-1.5 text-[#A1A1AA]">
+                <p><span className="text-[#10B981]">02:14</span> fix: numbers finally add up</p>
+                <p><span className="text-[#10B981]">03:41</span> wip: rewriting the whole pitch, sorry</p>
+                <p><span className="text-[#F59E0B]">04:52</span> fix: typo in title (had one job)</p>
+                <p><span className="text-[#E92A39]">05:58</span> feat: submitted. we are never doing this again</p>
+              </div>
+            </PinnedCard>
+          </ScrollReveal>
+
+          {/* Sticky note — handwritten, small, tucked between */}
+          <ScrollReveal className="md:col-span-3 md:col-start-2" delay={140}>
+            <div
+              className="bg-[#F5E663] text-[#1a1a1a] p-5 md:p-6 rounded-sm shadow-2xl md:-mt-4 md:ml-8"
+              style={{ transform: 'rotate(3deg)', fontFamily: "'Kalam', cursive" }}
+            >
+              <p className="text-lg md:text-xl leading-snug font-bold">
+                we are NOT giving up at hour 4. — team note to self
+              </p>
             </div>
+          </ScrollReveal>
+
+          {/* Polaroid — placeholder image, swap for a real photo later */}
+          <ScrollReveal className="md:col-span-4 md:col-start-6" delay={100}>
+            <div className="bg-[#EDEDED] p-3 pb-8 rounded-sm shadow-2xl md:mt-2" style={{ transform: 'rotate(-3deg)' }}>
+              <div className="w-full aspect-[4/5] bg-[#0A0A0A] rounded-sm overflow-hidden">
+                <img src={img7} alt="" className="w-full h-full object-cover opacity-90" />
+              </div>
+              <p
+                className="text-center text-[#1a1a1a] text-sm md:text-base mt-3"
+                style={{ fontFamily: "'Kalam', cursive" }}
+              >
+                canteen, 4:12 AM, still going
+              </p>
+            </div>
+          </ScrollReveal>
+        </div>
+
+        {/* Live ticker — real platform signal, not a sourced global stat */}
+        <ScrollReveal delay={220}>
+          <div className="mt-14 md:mt-20 bg-[#0A0A0A] border border-[#2A2A2E] rounded-2xl md:rounded-full px-6 md:px-10 py-5 md:py-6 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+              <span className="text-white font-black text-sm md:text-base">
+                {liveSquadCount > 0 ? liveSquadCount : '—'} squads are mid-brief right now
+              </span>
+            </div>
+            <p className="text-[#71717A] text-xs md:text-sm font-bold text-center md:text-right">
+              Yours could be next. Vault opens Aug 31.
+            </p>
+            <button
+              onClick={scrollToWaitlist}
+              className="bg-[#E92A39] hover:bg-[#ff3b4b] text-white px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest shrink-0 transition-colors"
+            >
+              Get In Before It Opens
+            </button>
           </div>
         </ScrollReveal>
       </section>
 
-      {/* MINIMAL EDITORIAL FOOTER */}
-      <footer className="py-16 px-6 md:px-12 border-t border-gray-200 bg-white relative z-10">
-        <ScrollReveal direction="up">
-          <div className="max-w-[1600px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
-            
-            <div className="md:col-span-2 flex flex-col items-start gap-8">
-              <ImageWithFallback 
-                src={logoImage} 
-                alt="InGenuityX Logo" 
-                className="h-10 md:h-14 w-auto object-contain opacity-90 scale-[1.5] md:scale-[1.8] origin-left" 
-              />
-              <p className="text-gray-500 text-sm max-w-xs leading-relaxed font-bold">Bridging the gap between Gen Z talent and brand briefs. Stop simulating. Start building.</p>
-            </div>
+      {/* 7. HOW THE LOOP CLOSES */}
+      <section className="py-16 md:py-24 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-[#2A2A2E]">
+        <ScrollReveal>
+          <div className="mb-10 md:mb-16">
+            <h2 className="text-3xl md:text-6xl font-black tracking-tight text-white mb-2 md:mb-4">
+              Nobody submits into a void.
+            </h2>
+            <p className="text-[#A1A1AA] font-bold text-sm md:text-xl">
+              Win or lose, you get graded. That's the whole point.
+            </p>
+          </div>
+        </ScrollReveal>
 
-            <div className="flex flex-col">
-              <h4 className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-6">Platform</h4>
-              <div className="flex flex-col space-y-4 text-black text-sm font-bold">
-                <Link to="/" className="hover:text-[#E92A39] transition-colors w-fit">Home</Link>
-                <Link to="/about" className="hover:text-[#E92A39] transition-colors w-fit">About Us</Link>
-                <Link to="/contact" className="hover:text-[#E92A39] transition-colors w-fit">Contact</Link>
+        <div className="grid lg:grid-cols-2 gap-6 md:gap-8 items-stretch">
+          
+          {/* LEFT: 360 Degree Ring using exact CATEGORY_COLORS */}
+          <ScrollReveal className="w-full h-full" delay={0}>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-8 md:gap-12 bg-[#161616]/80 backdrop-blur-sm border border-[#2A2A2E] rounded-[2rem] p-8 md:p-12 w-full h-full">
+              
+              <div className="relative w-48 h-48 md:w-56 md:h-56 shrink-0">
+                <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90 drop-shadow-2xl">
+                  {/* Background Track */}
+                  <circle cx="50" cy="50" r="40" fill="transparent" stroke="#2A2A2E" strokeWidth="12" />
+                  
+                  {/* Colored Segments (Circumference ~251.3, gap of ~2) */}
+                  <circle cx="50" cy="50" r="40" fill="transparent" stroke={CATEGORY_COLORS.Marketing} strokeWidth="12" strokeDasharray="48 251.3" strokeDashoffset="0" className="transition-all duration-1000" />
+                  <circle cx="50" cy="50" r="40" fill="transparent" stroke={CATEGORY_COLORS.Tech} strokeWidth="12" strokeDasharray="48 251.3" strokeDashoffset="-50.2" className="transition-all duration-1000 delay-100" />
+                  <circle cx="50" cy="50" r="40" fill="transparent" stroke={CATEGORY_COLORS.Design} strokeWidth="12" strokeDasharray="48 251.3" strokeDashoffset="-100.5" className="transition-all duration-1000 delay-200" />
+                  <circle cx="50" cy="50" r="40" fill="transparent" stroke={CATEGORY_COLORS.Sustainability} strokeWidth="12" strokeDasharray="48 251.3" strokeDashoffset="-150.7" className="transition-all duration-1000 delay-300" />
+                  <circle cx="50" cy="50" r="40" fill="transparent" stroke={CATEGORY_COLORS.Innovation} strokeWidth="12" strokeDasharray="48 251.3" strokeDashoffset="-201" className="transition-all duration-1000 delay-400" />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <span className="text-3xl font-black text-white">360°</span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-[#71717A]">Evaluation</span>
+                </div>
+              </div>
+
+              {/* Legend */}
+              <div className="flex flex-col gap-4 w-full max-w-[200px]">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#71717A] border-b border-[#2A2A2E] pb-2">The InGenuityX Rubric</span>
+                {Object.entries(CATEGORY_COLORS).map(([name, color]) => (
+                  <div key={name} className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full shadow-lg" style={{ backgroundColor: color }} />
+                    <span className="text-white text-xs md:text-sm font-bold uppercase tracking-widest">{name}</span>
+                  </div>
+                ))}
               </div>
             </div>
+          </ScrollReveal>
 
+          {/* RIGHT: SRMB Ironclad Real Scorecard */}
+          <ScrollReveal delay={150} className="w-full h-full">
+            <div className="bg-[#1C1C1E]/80 backdrop-blur-md border border-[#2A2A2E] rounded-[2rem] p-8 md:p-12 relative overflow-hidden h-full flex flex-col justify-between">
+              
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-[#2A2A2E] pb-6">
+                <div className="flex items-center gap-3">
+                  <img src={srmbLogo} alt="SRMB" className="w-10 h-10 rounded-full object-contain bg-white p-1" />
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-[#A1A1AA] font-bold uppercase tracking-widest leading-none mb-1.5">Live Seeded Challenge</span>
+                    <span className="text-base md:text-lg font-black text-white leading-none">SRMB Ironclad</span>
+                  </div>
+                </div>
+                <span className="text-[10px] md:text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full bg-[#E92A39]/10 text-[#E92A39] border border-[#E92A39]/30 w-fit">Not Selected</span>
+              </div>
+
+              <div className="space-y-5 mb-8">
+                {[
+                  { label: 'Marketing Strategy', score: 8.5, color: CATEGORY_COLORS.Marketing },
+                  { label: 'Creative Design', score: 7.2, color: CATEGORY_COLORS.Design },
+                  { label: 'Technical Viability', score: 4.8, color: CATEGORY_COLORS.Tech },
+                  { label: 'Overall Innovation', score: 6.5, color: CATEGORY_COLORS.Innovation },
+                ].map((row, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between text-xs md:text-sm font-black text-white mb-2">
+                      <span>{row.label}</span>
+                      <span>{row.score}/10</span>
+                    </div>
+                    <div className="h-2.5 bg-[#0A0A0A] rounded-full overflow-hidden border border-[#2A2A2E]">
+                      <div className="h-full rounded-full" style={{ width: `${row.score * 10}%`, backgroundColor: row.color }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-[#A1A1AA] text-sm md:text-base font-bold italic border-t border-[#2A2A2E] pt-6 mt-auto">
+                "Strong lateral marketing angles, but the technical execution needed much sharper scoping to be viable."
+              </p>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* 8. FAQ */}
+      <section className="py-16 md:py-24 px-4 md:px-8 bg-transparent border-t border-[#2A2A2E]">
+        <div className="max-w-3xl mx-auto">
+          <ScrollReveal>
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-8 md:mb-10 text-white text-left md:text-center">Before you ask.</h2>
+            <div className="bg-[#151515]/80 backdrop-blur-sm border border-[#2A2A2E] rounded-2xl md:rounded-[2rem] px-5 md:px-10">
+              {faqs.map((faq, i) => (
+                <FaqItem key={i} q={faq.q} a={faq.a} isOpen={openFaq === i} onClick={() => setOpenFaq(openFaq === i ? -1 : i)} />
+              ))}
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* 9. FINAL COUNTDOWN CTA */}
+      <section className="py-16 md:py-24 px-4 md:px-8 max-w-[1600px] mx-auto relative z-10">
+        <ScrollReveal>
+          <div className="bg-[#1C1C1E]/80 backdrop-blur-md border border-[#2A2A2E] rounded-2xl md:rounded-[3rem] p-8 md:p-20 text-center flex flex-col items-center shadow-2xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-t from-[#E92A39]/10 to-transparent pointer-events-none"></div>
+            <h2 className="text-3xl md:text-6xl font-black tracking-tight text-white mb-4 md:mb-6 relative z-10">
+              Vault opens August 31st.
+            </h2>
+            <p className="text-[#A1A1AA] text-sm md:text-lg font-bold mb-8 md:mb-10 max-w-xl relative z-10">
+              Don't miss the first cohort of live briefs. Join the waitlist to secure early access.
+            </p>
+            <button onClick={scrollToWaitlist} className="bg-[#E92A39] hover:bg-[#ff3b4b] text-white px-8 md:px-10 py-4 md:py-5 rounded-full font-black text-xs md:text-sm uppercase tracking-widest hover:scale-105 transition-all shadow-lg relative z-10">
+              Join the Waitlist
+            </button>
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="py-12 md:py-16 px-6 md:px-12 border-t border-[#2A2A2E] bg-black/80 backdrop-blur-md">
+        <ScrollReveal>
+          <div className="max-w-[1600px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8">
+            <div className="md:col-span-2 flex flex-col items-start gap-6 md:gap-8">
+              <img src={logoImage} alt="InGenuityX Logo" className="h-6 md:h-10 w-auto object-contain" />
+              <p className="text-[#71717A] text-xs md:text-sm max-w-xs leading-relaxed font-bold">Bridging the gap between Gen Z talent and brand briefs. Stop simulating. Start building.</p>
+            </div>
             <div className="flex flex-col">
-              <h4 className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-6">Connect</h4>
-              <div className="flex flex-col space-y-4 text-sm font-bold text-black">
+              <h4 className="text-[#71717A] text-[10px] md:text-xs font-bold uppercase tracking-widest mb-4 md:mb-6">Platform</h4>
+              <div className="flex flex-col space-y-3 md:space-y-4 text-white text-xs md:text-sm font-bold">
+                <a href="#opportunities" className="hover:text-[#E92A39] transition-colors w-fit">Challenges</a>
+                <Link to="/about" className="hover:text-[#E92A39] transition-colors w-fit">About</Link>
+                <Link to="/for-brands" className="hover:text-[#E92A39] transition-colors w-fit">For Brands</Link>
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <h4 className="text-[#71717A] text-[10px] md:text-xs font-bold uppercase tracking-widest mb-4 md:mb-6">Connect</h4>
+              <div className="flex flex-col space-y-3 md:space-y-4 text-xs md:text-sm font-bold text-white">
                 <a href="mailto:storm@minervainnov.com" className="hover:text-[#E92A39] transition-colors w-fit">storm@minervainnov.com</a>
                 <a href="tel:+918320262013" className="hover:text-[#E92A39] transition-colors w-fit">+91 8320 262 013</a>
               </div>
             </div>
           </div>
-
-          <div className="max-w-[1600px] mx-auto mt-16 pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">© 2026 InGenuityX. All rights reserved.</p>
+          <div className="max-w-[1600px] mx-auto mt-12 md:mt-16 pt-6 md:pt-8 border-t border-[#2A2A2E]">
+            <p className="text-[10px] md:text-xs text-[#71717A] font-bold uppercase tracking-widest">© 2026 InGenuityX. All rights reserved.</p>
           </div>
         </ScrollReveal>
       </footer>
-
-      {/* DID YOU KNOW POPUP */}
-      {showHeroFact && didYouKnows[heroFactIndex] && (
-        <div className="fact-in fixed right-6 bottom-6 md:right-8 md:bottom-8 z-[100] max-w-xs w-[90%] bg-[#E92A39] rounded-[2rem] p-6 shadow-2xl">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xl drop-shadow-sm">💡</span>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white">Did you know?</p>
-            </div>
-            <button onClick={handleCloseFact} className="text-white/50 hover:text-white transition-colors">✕</button>
-          </div>
-          <p className="text-sm text-white leading-relaxed font-medium mb-4">{didYouKnows[heroFactIndex].text}</p>
-          {didYouKnows[heroFactIndex].tag && (
-            <span className="bg-white text-[#E92A39] text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full inline-block">
-              {didYouKnows[heroFactIndex].tag}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* 85% SCROLL REGISTRATION POPUP */}
-      {showScrollPopup && !hasDismissedPopup && !isLoggedIn && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#FAFCFC]/90 backdrop-blur-sm px-4">
-          <div className="bg-white border border-gray-200 p-10 md:p-12 rounded-[3rem] max-w-lg w-full text-center shadow-2xl">
-            <h3 className="text-3xl font-extrabold mb-4 tracking-tight text-black">You've seen enough to know.</h3>
-            <p className="text-gray-600 mb-10 text-sm leading-relaxed font-medium">Join the waitlist. Be first in line when challenges open on 27th July.</p>
-            <div className="flex flex-col gap-3">
-              
-              <button 
-                onClick={() => {
-                  handleDismissPopup();
-                  document.getElementById('waitlist-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }} 
-                className="w-full bg-[#E92A39] hover:bg-[#ff3b4b] text-white py-4 rounded-full font-bold text-sm transition-colors block shadow-md"
-              >
-                Join the Waitlist
-              </button>
-              
-              <button onClick={handleDismissPopup} className="w-full text-gray-500 hover:text-black py-3 rounded-full text-sm font-bold transition-colors">
-                Keep exploring
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* LOGIN REQUIRED MODAL (FOR THE WALL) */}
-      {showLoginModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#FAFCFC]/90 backdrop-blur-sm px-4">
-          <div className="bg-white border border-gray-200 p-8 rounded-[3rem] max-w-sm w-full text-center animate-slide-in shadow-2xl">
-            <span className="text-5xl mb-4 block drop-shadow-sm">🔒</span>
-            <h3 className="text-2xl font-extrabold mb-2 text-black">Hold up.</h3>
-            <p className="text-gray-600 mb-8 text-sm font-medium">You need to log in to post on the wall.</p>
-            <div className="flex flex-col gap-3 justify-center">
-              <button onClick={() => navigate('/login')} className="w-full bg-[#E92A39] hover:bg-[#ff3b4b] text-white px-4 py-3 rounded-full font-bold transition-colors shadow-sm">
-                Go to Login
-              </button>
-              <button onClick={() => setShowLoginModal(false)} className="w-full bg-gray-100 hover:bg-gray-200 text-black px-4 py-3 rounded-full font-bold transition-colors">
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* CUSTOM LOGOUT MODAL */}
-      {showLogoutModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#FAFCFC]/90 backdrop-blur-sm px-4">
-          <div className="bg-white border border-gray-200 p-8 rounded-[3rem] max-w-sm w-full text-center shadow-2xl">
-            <h3 className="text-xl font-extrabold mb-2 tracking-tight text-black">Sign out?</h3>
-            <p className="text-gray-600 mb-8 text-sm font-medium">Are you sure you want to lock your vault?</p>
-            <div className="flex gap-3">
-              <button onClick={() => setShowLogoutModal(false)} className="flex-1 bg-gray-100 hover:bg-gray-200 text-black py-3 rounded-full text-sm font-bold transition-colors">
-                Cancel
-              </button>
-              <button onClick={confirmLogout} className="flex-1 bg-[#E92A39] hover:bg-[#ff3b4b] text-white py-3 rounded-full text-sm font-bold transition-colors shadow-sm">
-                Sign Out
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }

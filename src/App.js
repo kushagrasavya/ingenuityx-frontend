@@ -11,8 +11,8 @@ import ScrollToTop from './components/ScrollToTop';
 import Register from './pages/Register';
 import PostChallenge from './pages/PostChallenge';
 import Login from './pages/Login';
-import About from './pages/About'; // You need this file!
-import Contact from './pages/Contact'; // You need this file!
+import About from './pages/About'; 
+import Contact from './pages/Contact'; 
 
 function App() {
   return (
@@ -30,8 +30,11 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/post-a-challenge" element={<PostChallenge />} />
           <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-          {/* HERE IS YOUR MISSING LOGIN ROUTE 👇 */}
+          <Route path="/contact" element={<Contact />} />
+          
+          {/* 👇 ADD THIS EXACT ROUTE 👇 */}
+          <Route path="/for-brands" element={<Contact />} />
+          
           <Route path="/login" element={<Login />} />
         </Routes>
       </BrowserRouter>
