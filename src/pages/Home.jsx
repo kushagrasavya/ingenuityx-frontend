@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ImageWithFallback } from '../components/ImageWithFallback';
-import { Search, Lock, CheckCircle2, ChevronRight, Clock, Award, Upload, Scale, FileText, TrendingUp, MessageCircle, Mic, Terminal } from 'lucide-react';
+import { Search, Lock, CheckCircle2, ChevronRight, Clock, Award, Upload, Scale, FileText, TrendingUp, MessageCircle, Terminal, Copy } from 'lucide-react';
+import Globe from 'react-globe.gl';
 
 // --- MEDIA IMPORTS ---
 import billboardImage from '../imports/Gemini_Generated_Image_1l2vfz1l2vfz1l2v.png';
@@ -61,12 +62,37 @@ const CATEGORY_DATA = {
   Innovation: { img: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=800&auto=format&fit=crop', desc: 'Open-ended problem solving and lateral thinking.' }
 };
 
-// --- REWARD IMAGES (For Section 4 Cards) ---
+// --- REWARDS DATA ---
+const PLATFORM_REWARDS = [
+  { top: "120+", title: "Internships", sub: "+ Rs 50k Stipends" },
+  { top: "100%", title: "Verified", sub: "+ Real Certificates" },
+  { top: "₹5L+", title: "Prize Pool", sub: "+ Tech Setups" },
+  { top: "50+", title: "PPIs", sub: "+ Boardroom Access" }
+];
+
 const REWARD_IMAGES = [
   "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800&auto=format&fit=crop", 
   "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&auto=format&fit=crop", 
   img6, 
   "https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=800&auto=format&fit=crop"  
+];
+
+const PROCESS_CLIPS = [
+  { src: preparation2, label: '01 / BRIEF PADHO', className: 'md:col-span-7 md:row-span-2' },
+  { src: intervie, label: '02 / INSIGHT DHUNDO', className: 'md:col-span-5' },
+  { src: chaos, label: '03 / FIRST IDEA TODO', className: 'md:col-span-5' },
+  { src: prep, label: '04 / CASE BANAO', className: 'md:col-span-5' },
+  { src: celebration4, label: '05 / SUBMIT KARO', className: 'md:col-span-7' },
+];
+
+// --- MAP DATA ---
+const OUTREACH_CITIES = [
+  { name: "Delhi", lat: 28.6139, lng: 77.2090, companies: ["Nuvoco", "Eveready Industries"] },
+  { name: "Gurugram", lat: 28.4595, lng: 77.0266, companies: ["TrooTech", "Zomato"] },
+  { name: "Mumbai", lat: 19.0760, lng: 72.8777, companies: ["Legrand", "SRMB Steel"] },
+  { name: "Pune", lat: 18.5204, lng: 73.8567, companies: ["Tech Mahindra", "Bajaj Auto"] },
+  { name: "Bengaluru", lat: 12.9716, lng: 77.5946, companies: ["IngenX", "Wipro"] },
+  { name: "Kolkata", lat: 22.5726, lng: 88.3639, companies: ["ITC Limited", "SRMB Steel"] }
 ];
 
 // --- SCROLL REVEAL ---
@@ -122,7 +148,7 @@ function FaqItem({ q, a, isOpen, onClick }) {
   );
 }
 
-// --- PINNED CARD (proof wall artifact wrapper) ---
+// --- PINNED CARD ---
 function PinnedCard({ rotate = 0, className = '', children }) {
   return (
     <div
@@ -130,6 +156,91 @@ function PinnedCard({ rotate = 0, className = '', children }) {
       style={{ transform: `rotate(${rotate}deg)` }}
     >
       {children}
+    </div>
+  );
+}
+
+// --- INTERACTIVE 3D GLOBE COMPONENT ---
+function OutreachGlobe({ onCityClick, selectedCity }) {
+  const globeEl = useRef();
+  const containerRef = useRef();
+  const [dimensions, setDimensions] = useState({ width: 400, height: 400 });
+  const [statesData, setStatesData] = useState([]);
+
+  useEffect(() => {
+    // Initial camera position centered on India
+    if (globeEl.current) {
+      globeEl.current.pointOfView({ lat: 21.5937, lng: 78.9629, altitude: 0.8 }, 2000);
+      globeEl.current.controls().enableZoom = false; // Locks the scroll wheel so users don't zoom into the ocean
+    }
+
+    // Fetch India State Borders GeoJSON
+    fetch('https://raw.githubusercontent.com/Subhash9325/GeoJson-Data-of-Indian-States/master/Indian_States')
+      .then(res => res.json())
+      .then(data => {
+         setStatesData(data.features);
+      })
+      .catch(err => console.error("Error loading GeoJSON", err));
+  }, []);
+
+  // Smoothly move the camera when a city is clicked
+  useEffect(() => {
+    if (selectedCity && globeEl.current) {
+      globeEl.current.pointOfView({ lat: selectedCity.lat, lng: selectedCity.lng, altitude: 0.25 }, 1000);
+    } else if (!selectedCity && globeEl.current) {
+      globeEl.current.pointOfView({ lat: 21.5937, lng: 78.9629, altitude: 0.8 }, 1000);
+    }
+  }, [selectedCity]);
+
+  // Keep globe responsive to window resizes
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        setDimensions({
+          width: containerRef.current.offsetWidth,
+          height: containerRef.current.offsetHeight
+        });
+      }
+    };
+    handleResize();
+    setTimeout(handleResize, 100); // Failsafe for initial DOM paint
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return (
+    <div ref={containerRef} className="w-full h-full min-h-[350px] md:min-h-[500px] flex items-center justify-center cursor-move">
+      <Globe
+        ref={globeEl}
+        width={dimensions.width}
+        height={dimensions.height}
+        backgroundColor="rgba(0,0,0,0)"
+        globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
+        polygonsData={statesData}
+        polygonAltitude={0.005}
+        polygonCapColor={() => 'rgba(233, 42, 57, 0.05)'} // Subtle red state tint
+        polygonSideColor={() => 'rgba(0, 0, 0, 0)'}
+        polygonStrokeColor={() => 'rgba(233, 42, 57, 0.4)'} // Defined state lines
+        htmlElementsData={OUTREACH_CITIES}
+        htmlElement={d => {
+          const el = document.createElement('div');
+          el.innerHTML = `
+            <div class="relative flex items-center justify-center -translate-x-1/2 -translate-y-1/2 group pointer-events-auto cursor-pointer" style="width: 40px; height: 40px;">
+              <div class="absolute w-4 h-4 bg-[#E92A39] rounded-full animate-ping opacity-60"></div>
+              <div class="relative w-2 h-2 bg-[#E92A39] border border-white/50 rounded-full shadow-[0_0_10px_#E92A39]"></div>
+              <div class="absolute top-6 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-[10px] font-black uppercase tracking-widest text-white bg-[#161616]/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#2A2A2E] shadow-2xl z-50">
+                ${d.name}
+              </div>
+            </div>
+          `;
+          el.onclick = (e) => {
+             e.stopPropagation();
+             onCityClick(d);
+          };
+          return el;
+        }}
+        onGlobeClick={() => onCityClick(null)} // Click oceans/earth to zoom out
+      />
     </div>
   );
 }
@@ -148,6 +259,7 @@ export default function Home() {
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0 });
   const [openFaq, setOpenFaq] = useState(-1);
   const [heroVideoIndex, setHeroVideoIndex] = useState(0);
+  const [selectedCity, setSelectedCity] = useState(null); // Triggers the map side-stat swap
 
   const teaserScrollRef = useRef(null);
 
@@ -191,12 +303,27 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Hero video rotation: the first clip (and its matching red hook line) holds
+  // for FIRST_DURATION so the opener has room to land, then the rest of the
+  // reel cycles at the normal LOOP_DURATION pace.
   useEffect(() => {
-    if (heroVideos.length <= 1) return; 
-    const videoInterval = setInterval(() => {
+    if (heroVideos.length <= 1) return;
+
+    const FIRST_DURATION = 8000; // ms the first slot stays on screen
+    const LOOP_DURATION = 4000;  // ms per slot after that
+
+    let intervalId;
+    const firstTimeout = setTimeout(() => {
       setHeroVideoIndex((prevIndex) => (prevIndex + 1) % heroVideos.length);
-    }, 4000);
-    return () => clearInterval(videoInterval);
+      intervalId = setInterval(() => {
+        setHeroVideoIndex((prevIndex) => (prevIndex + 1) % heroVideos.length);
+      }, LOOP_DURATION);
+    }, FIRST_DURATION);
+
+    return () => {
+      clearTimeout(firstTimeout);
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [heroVideos.length]);
 
   useEffect(() => {
@@ -282,11 +409,11 @@ export default function Home() {
   };
 
   const faqs = [
-    { q: "Is this actually legit, or just dummy projects?", a: "Every brief on InGenuityX comes directly from a verified corporate partner looking to solve a real business problem. If you win, the brand actually implements (or tests) your solution." },
-    { q: "Do I need to be from a top college to apply?", a: "No. Brands evaluate your submission, not your college name. We hide academic pedigree during the initial shortlist phase to ensure ideas win on merit." },
-    { q: "Do I need a team?", a: "It depends on the brief. Some are solo, but most allow cross-campus teams (up to 4 members). You can build a team with friends from entirely different colleges." },
-    { q: "Is there an entry fee?", a: "Never. InGenuityX is completely free for students. Brands pay to host challenges, you participate for free." },
-    { q: "What happens if I submit but don't win?", a: "You get 'The Rejection Letter'—a scorecard breaking down exactly how judges rated your Insight, Strategy, and Execution so you can actually improve." }
+    { q: "Is this actually legit, or filler content?", a: "Bilkul legit. Every brief comes straight from a real brand with a real problem — win, and they might actually build your idea, not just hand you a PDF certificate." },
+    { q: "Do I need a top college tag to win?", a: "Nahi. We hide your college name till the shortlist stage — brands only see the idea. Merit se hoga, tag se nahi." },
+    { q: "Solo run ya squad zaroori hai?", a: "Depends on the brief. Kuch solo hote hain, most let you squad up with up to 4 log — even from totally different colleges." },
+    { q: "Any entry fee? What's the catch?", a: "Zero catch, zero fee. Kabhi nahi. Brands pay to be here — tumhara kaam sirf build karna hai." },
+    { q: "Submit kiya, jeeta nahi — waste gaya?", a: "Bilkul nahi. You still get 'The Rejection Letter' — a real scorecard on your Insight, Strategy aur Execution. Actual feedback, participation trophy nahi." }
   ];
 
   const filters = ['All', 'Marketing', 'Tech', 'Design', 'Sustainability', 'Innovation'];
@@ -296,11 +423,7 @@ export default function Home() {
     return matchesFilter && matchesSearch;
   });
 
-  const uniqueRewards = Array.from(new Set(opportunities.map(o => o.points).filter(Boolean))).slice(0, 4);
-
-  // Pre-launch: no real "squads mid-brief" number exists yet. Wire this to
-  // a real live count once the vault opens Aug 31 — until then it renders
-  // as "—" so we're not faking a stat.
+  // Pre-launch: no real "squads mid-brief" number exists yet.
   const liveSquadCount = 0;
 
   return (
@@ -396,7 +519,6 @@ export default function Home() {
                 </div>
               </>
             ) : (
-              // NEW QUEUE UI AFTER SIGNUP
               <div id="waitlist-form" className="mt-6 md:mt-8 w-full max-w-xl bg-[#151515]/90 backdrop-blur-md border border-[#2A2A2E] rounded-[2rem] p-6 md:p-8 shadow-2xl animate-text-fade-up">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                   <h3 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
@@ -544,25 +666,22 @@ export default function Home() {
           </ScrollReveal>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {uniqueRewards.map((reward, i) => (
+            {PLATFORM_REWARDS.map((reward, i) => (
               <ScrollReveal key={i} delay={i * 50}>
                 <div className="relative bg-[#0A0A0A]/80 backdrop-blur-sm border border-[#2A2A2E] rounded-[1.5rem] md:rounded-[2rem] text-center flex flex-col items-center justify-center min-h-[140px] md:min-h-[200px] hover:border-[#E92A39]/50 transition-colors overflow-hidden group">
                   <img src={REWARD_IMAGES[i % REWARD_IMAGES.length]} alt="" className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-80 group-hover:scale-110 transition-all duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/80 to-transparent"></div>
+                  
+                  {/* NEW NUMERIC DESIGN */}
                   <div className="relative z-10 p-6 md:p-8 w-full flex flex-col items-center justify-center h-full">
-                    <h4 className="text-xl md:text-2xl font-black text-white mb-1 md:mb-2">{reward.includes('+') ? reward.split('+')[0].trim() : reward}</h4>
-                    {reward.includes('+') && <span className="text-xs md:text-sm font-bold text-[#E92A39]">+{reward.split('+')[1].trim()}</span>}
+                    <h3 className="text-4xl md:text-5xl font-black text-white mb-1 drop-shadow-md">{reward.top}</h3>
+                    <h4 className="text-sm md:text-base font-bold text-[#FAFAFA] mb-2 uppercase tracking-widest drop-shadow-sm">{reward.title}</h4>
+                    <span className="text-[10px] md:text-xs font-black text-[#E92A39] uppercase tracking-widest bg-[#E92A39]/10 border border-[#E92A39]/20 px-3 py-1 rounded-full mt-2 backdrop-blur-md">{reward.sub}</span>
                   </div>
+
                 </div>
               </ScrollReveal>
             ))}
-            {uniqueRewards.length < 4 && (
-              <ScrollReveal delay={200}>
-                <div className="bg-[#1C1C1E]/80 backdrop-blur-sm border border-dashed border-[#2A2A2E] p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] text-center flex flex-col items-center justify-center min-h-[140px] md:min-h-[200px]">
-                  <h4 className="text-sm md:text-xl font-bold text-[#71717A] mb-2">+ More dropping launch day</h4>
-                </div>
-              </ScrollReveal>
-            )}
           </div>
         </div>
       </section>
@@ -689,215 +808,129 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. 4 AM IS WHEN YOU FIND OUT — Artifact Wall */}
-      <section className="py-16 md:py-28 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-[#2A2A2E] relative overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#E92A39]/5 rounded-full blur-[120px] pointer-events-none" />
-
+      {/* 6. 30 SECONDS INSIDE A CHALLENGE */}
+      <section id="inside" className="py-16 md:py-28 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-[#2A2A2E] relative overflow-hidden">
         <ScrollReveal>
-          <div className="mb-12 md:mb-20 text-left">
-            
-            <h2 className="text-3xl md:text-6xl font-black tracking-tight text-white mb-3 md:mb-4 max-w-3xl">
-              Because 4 AM is when you find out what you're made of.
+          <div className="max-w-3xl mb-12 md:mb-16">
+            <div className="mb-5 flex items-center gap-3">
+              
+            </div>
+
+            <h2 className="text-3xl md:text-6xl font-black tracking-tight text-white mb-4">
+              Read. Argue. Build.
+              <br />
+              <span className="text-[#A1A1AA]">Submit.</span>
             </h2>
-            <p className="text-[#A1A1AA] font-bold text-sm md:text-xl max-w-2xl">
-              Every brief has a version of this night. Here's what one actually looked like.
+
+            <p className="max-w-xl text-base md:text-xl font-bold text-[#A1A1AA]">
+              Brief khulta hai. Ideas clash karte hain. First draft toot-ta hai.
+              Phir kuch genuinely solid banta hai.
             </p>
           </div>
         </ScrollReveal>
 
-        {/* SCATTERED PROOF WALL */}
-        <div className="relative grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 md:gap-y-12">
-
-          {/* Chat log — team panic, 3 hours out */}
-          <ScrollReveal className="md:col-span-5 md:col-start-1" delay={0}>
-            <PinnedCard rotate={-2} className="relative overflow-hidden md:-mt-2 p-0">
-              <div 
-                className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" 
-                style={{ 
-                  backgroundImage: `url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}
-              />
-              <div className="p-4 md:p-5 relative z-10">
-                <div className="flex items-center gap-2 mb-3 text-[#71717A] bg-[#161616]/90 backdrop-blur-sm border border-[#2A2A2E] px-3 py-1.5 rounded-full w-fit shadow-sm">
-                  <MessageCircle className="w-3.5 h-3.5" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Team Ironclad — group chat</span>
-                </div>
-                <div className="space-y-2 text-sm font-semibold flex flex-col">
-                  <div className="bg-[#202C33] border border-[#2A2A2E] rounded-2xl rounded-tl-sm px-4 py-2.5 w-fit max-w-[85%] text-[#FAFAFA] shadow-sm">
-                    ok the deck is done but slide 6 makes no sense at 2am energy
-                  </div>
-                  <div className="bg-[#202C33] border border-[#2A2A2E] rounded-2xl rounded-tl-sm px-4 py-2.5 w-fit max-w-[85%] text-[#FAFAFA] shadow-sm">
-                    rebuilding it now don't touch anything
-                  </div>
-                  <div className="bg-[#005C4B] border border-[#2A2A2E] rounded-2xl rounded-tr-sm px-4 py-2.5 w-fit max-w-[85%] text-white ml-auto text-right shadow-sm">
-                    someone get chai. this is happening
-                  </div>
-                </div>
-              </div>
-            </PinnedCard>
-          </ScrollReveal>
-
-          {/* Terminal — countdown to deadline via commit log */}
-          <ScrollReveal className="md:col-span-6 md:col-start-7" delay={80}>
-            <PinnedCard rotate={1.5} className="p-4 md:p-5 md:mt-6 font-mono">
-              <div className="flex items-center gap-2 mb-3 text-[#71717A]">
-                <Terminal className="w-3.5 h-3.5" />
-                <span className="text-[10px] font-black uppercase tracking-widest">solid-shift-submission — main</span>
-              </div>
-              <div className="text-xs md:text-sm space-y-1.5 text-[#A1A1AA]">
-                <p><span className="text-[#10B981]">02:14</span> fix: numbers finally add up</p>
-                <p><span className="text-[#10B981]">03:41</span> wip: rewriting the whole pitch, sorry</p>
-                <p><span className="text-[#F59E0B]">04:52</span> fix: typo in title (had one job)</p>
-                <p><span className="text-[#E92A39]">05:58</span> feat: submitted. we are never doing this again</p>
-              </div>
-            </PinnedCard>
-          </ScrollReveal>
-
-          {/* Sticky note — handwritten, small, tucked between */}
-          <ScrollReveal className="md:col-span-3 md:col-start-2" delay={140}>
-            <div
-              className="bg-[#F5E663] text-[#1a1a1a] p-5 md:p-6 rounded-sm shadow-2xl md:-mt-4 md:ml-8"
-              style={{ transform: 'rotate(3deg)', fontFamily: "'Kalam', cursive" }}
-            >
-              <p className="text-lg md:text-xl leading-snug font-bold">
-                we are NOT giving up at hour 4. — team note to self
-              </p>
-            </div>
-          </ScrollReveal>
-
-          {/* Polaroid — placeholder image, swap for a real photo later */}
-          <ScrollReveal className="md:col-span-4 md:col-start-6" delay={100}>
-            <div className="bg-[#EDEDED] p-3 pb-8 rounded-sm shadow-2xl md:mt-2" style={{ transform: 'rotate(-3deg)' }}>
-              <div className="w-full aspect-[4/5] bg-[#0A0A0A] rounded-sm overflow-hidden">
-                <img src={img7} alt="" className="w-full h-full object-cover opacity-90" />
-              </div>
-              <p
-                className="text-center text-[#1a1a1a] text-sm md:text-base mt-3"
-                style={{ fontFamily: "'Kalam', cursive" }}
-              >
-                canteen, 4:12 AM, still going
-              </p>
-            </div>
-          </ScrollReveal>
+        <div className="mt-12 grid auto-rows-[16rem] gap-4 md:grid-cols-12">
+          {PROCESS_CLIPS.map((clip, index) => (
+            <ScrollReveal key={clip.label} className={clip.className} delay={index * 50}>
+              <figure className="group relative overflow-hidden rounded-[2rem] border border-[#2A2A2E] bg-[#161616] h-full w-full">
+                <video
+                  src={clip.src}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  className="h-full w-full object-cover opacity-60 transition duration-700 group-hover:scale-[1.03] group-hover:opacity-90"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none" />
+                <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6 md:p-8">
+                  <span className="font-mono text-xs md:text-sm font-black tracking-[0.16em] text-white">
+                    {clip.label}
+                  </span>
+                  <span className="h-2 w-2 rounded-full bg-[#E92A39] opacity-0 transition group-hover:opacity-100" />
+                </figcaption>
+              </figure>
+            </ScrollReveal>
+          ))}
         </div>
-
-        {/* Live ticker — real platform signal, not a sourced global stat */}
-        <ScrollReveal delay={220}>
-          <div className="mt-14 md:mt-20 bg-[#0A0A0A] border border-[#2A2A2E] rounded-2xl md:rounded-full px-6 md:px-10 py-5 md:py-6 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-              <span className="text-white font-black text-sm md:text-base">
-                {liveSquadCount > 0 ? liveSquadCount : '—'} squads are mid-brief right now
-              </span>
-            </div>
-            <p className="text-[#71717A] text-xs md:text-sm font-bold text-center md:text-right">
-              Yours could be next. Vault opens Aug 31.
-            </p>
-            <button
-              onClick={scrollToWaitlist}
-              className="bg-[#E92A39] hover:bg-[#ff3b4b] text-white px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest shrink-0 transition-colors"
-            >
-              Get In Before It Opens
-            </button>
-          </div>
-        </ScrollReveal>
       </section>
 
-      {/* 7. HOW THE LOOP CLOSES */}
+      {/* 7. THE CORPORATE CORRIDOR (Interactive 3D Map) */}
       <section className="py-16 md:py-24 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-[#2A2A2E]">
         <ScrollReveal>
-          <div className="mb-10 md:mb-16">
-            <h2 className="text-3xl md:text-6xl font-black tracking-tight text-white mb-2 md:mb-4">
-              Nobody submits into a void.
+          <div className="mb-10 md:mb-16 text-left md:text-center">
+            <h2 className="text-3xl md:text-6xl font-black tracking-tight text-white mb-3 md:mb-4">
+              We're not waiting. <span className="text-[#E92A39]">We're already in the room.</span>
             </h2>
-            <p className="text-[#A1A1AA] font-bold text-sm md:text-xl">
-              Win or lose, you get graded. That's the whole point.
+            <p className="text-[#A1A1AA] font-bold text-sm md:text-xl max-w-2xl md:mx-auto">
+              Right now, we're in the inbox of R&D and innovation leads across India's biggest business hubs. Hover the pins on the interactive map.
             </p>
           </div>
         </ScrollReveal>
 
-        <div className="grid lg:grid-cols-2 gap-6 md:gap-8 items-stretch">
-          
-          {/* LEFT: 360 Degree Ring using exact CATEGORY_COLORS */}
-          <ScrollReveal className="w-full h-full" delay={0}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-8 md:gap-12 bg-[#161616]/80 backdrop-blur-sm border border-[#2A2A2E] rounded-[2rem] p-8 md:p-12 w-full h-full">
-              
-              <div className="relative w-48 h-48 md:w-56 md:h-56 shrink-0">
-                <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90 drop-shadow-2xl">
-                  {/* Background Track */}
-                  <circle cx="50" cy="50" r="40" fill="transparent" stroke="#2A2A2E" strokeWidth="12" />
-                  
-                  {/* Colored Segments (Circumference ~251.3, gap of ~2) */}
-                  <circle cx="50" cy="50" r="40" fill="transparent" stroke={CATEGORY_COLORS.Marketing} strokeWidth="12" strokeDasharray="48 251.3" strokeDashoffset="0" className="transition-all duration-1000" />
-                  <circle cx="50" cy="50" r="40" fill="transparent" stroke={CATEGORY_COLORS.Tech} strokeWidth="12" strokeDasharray="48 251.3" strokeDashoffset="-50.2" className="transition-all duration-1000 delay-100" />
-                  <circle cx="50" cy="50" r="40" fill="transparent" stroke={CATEGORY_COLORS.Design} strokeWidth="12" strokeDasharray="48 251.3" strokeDashoffset="-100.5" className="transition-all duration-1000 delay-200" />
-                  <circle cx="50" cy="50" r="40" fill="transparent" stroke={CATEGORY_COLORS.Sustainability} strokeWidth="12" strokeDasharray="48 251.3" strokeDashoffset="-150.7" className="transition-all duration-1000 delay-300" />
-                  <circle cx="50" cy="50" r="40" fill="transparent" stroke={CATEGORY_COLORS.Innovation} strokeWidth="12" strokeDasharray="48 251.3" strokeDashoffset="-201" className="transition-all duration-1000 delay-400" />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <span className="text-3xl font-black text-white">360°</span>
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-[#71717A]">Evaluation</span>
-                </div>
-              </div>
+        <ScrollReveal delay={100}>
+          <div className="relative bg-[#1C1C1E]/80 backdrop-blur-sm border border-[#2A2A2E] rounded-[2rem] p-6 md:p-12 flex flex-col md:flex-row items-center gap-8 md:gap-16 overflow-hidden">
+            <div className="absolute -top-1/3 left-1/4 w-[600px] h-[600px] bg-[#E92A39]/10 rounded-full blur-[120px] pointer-events-none" />
 
-              {/* Legend */}
-              <div className="flex flex-col gap-4 w-full max-w-[200px]">
-                <span className="text-[10px] font-black uppercase tracking-widest text-[#71717A] border-b border-[#2A2A2E] pb-2">The InGenuityX Rubric</span>
-                {Object.entries(CATEGORY_COLORS).map(([name, color]) => (
-                  <div key={name} className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full shadow-lg" style={{ backgroundColor: color }} />
-                    <span className="text-white text-xs md:text-sm font-bold uppercase tracking-widest">{name}</span>
-                  </div>
-                ))}
+            {/* INTERACTIVE 3D GLOBE */}
+            <div className="w-full md:w-1/2 h-[350px] md:h-[500px] relative z-10 cursor-move border border-[#2A2A2E] rounded-[2rem] bg-[#0A0A0A] overflow-hidden">
+              <OutreachGlobe onCityClick={setSelectedCity} selectedCity={selectedCity} />
+              <div className="absolute bottom-4 left-4 pointer-events-none">
+                 <span className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest text-[#A1A1AA] flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" /> Live Tracking
+                 </span>
               </div>
             </div>
-          </ScrollReveal>
 
-          {/* RIGHT: SRMB Ironclad Real Scorecard */}
-          <ScrollReveal delay={150} className="w-full h-full">
-            <div className="bg-[#1C1C1E]/80 backdrop-blur-md border border-[#2A2A2E] rounded-[2rem] p-8 md:p-12 relative overflow-hidden h-full flex flex-col justify-between">
-              
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-[#2A2A2E] pb-6">
-                <div className="flex items-center gap-3">
-                  <img src={srmbLogo} alt="SRMB" className="w-10 h-10 rounded-full object-contain bg-white p-1" />
-                  <div className="flex flex-col">
-                    <span className="text-[9px] text-[#A1A1AA] font-bold uppercase tracking-widest leading-none mb-1.5">Live Seeded Challenge</span>
-                    <span className="text-base md:text-lg font-black text-white leading-none">SRMB Ironclad</span>
+            {/* SIDE STATS */}
+            <div className="w-full md:w-1/2 flex flex-col gap-6 relative z-10 h-full">
+              {!selectedCity ? (
+                <div className="bg-[#161616] border border-[#2A2A2E] p-6 md:p-8 rounded-3xl animate-text-fade-up">
+                  <h3 className="text-5xl md:text-7xl font-black text-white leading-none mb-2">{OUTREACH_CITIES.length}</h3>
+                  <p className="text-[#E92A39] font-black text-xs md:text-sm uppercase tracking-widest mb-4">Major Business Hubs</p>
+                  <div className="h-px w-full bg-[#2A2A2E] mb-4" />
+                  <p className="text-[#A1A1AA] text-sm md:text-base font-semibold leading-relaxed">
+                    From Gurugram boardrooms to Bengaluru's R&D floors — these are the cities where we're actively pitching InGenuityX to brand partners. Tap a pin on the map to see who we're talking to.
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-[#161616] border border-[#E92A39]/40 p-6 md:p-8 rounded-3xl animate-text-fade-up shadow-[0_0_30px_rgba(233,42,57,0.08)]">
+                  <button onClick={() => setSelectedCity(null)} className="text-[#A1A1AA] text-[10px] font-black uppercase tracking-widest mb-6 hover:text-white transition-colors flex items-center gap-1">
+                    ← Back to Overview
+                  </button>
+                  <h3 className="text-4xl md:text-5xl font-black text-white leading-none mb-2">{selectedCity.name}</h3>
+                  <p className="text-[#E92A39] font-black text-xs md:text-sm uppercase tracking-widest mb-4">Active Corporate Outreach</p>
+                  <div className="h-px w-full bg-[#2A2A2E] mb-6" />
+                  <div className="flex flex-col gap-3">
+                    {selectedCity.companies.map((company, i) => (
+                      <div key={i} className="flex items-center gap-3 bg-[#0A0A0A] border border-[#2A2A2E] px-4 py-3 rounded-xl">
+                        <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
+                        <span className="text-white font-bold text-sm md:text-base">{company}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <span className="text-[10px] md:text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full bg-[#E92A39]/10 text-[#E92A39] border border-[#E92A39]/30 w-fit">Not Selected</span>
-              </div>
+              )}
 
-              <div className="space-y-5 mb-8">
-                {[
-                  { label: 'Marketing Strategy', score: 8.5, color: CATEGORY_COLORS.Marketing },
-                  { label: 'Creative Design', score: 7.2, color: CATEGORY_COLORS.Design },
-                  { label: 'Technical Viability', score: 4.8, color: CATEGORY_COLORS.Tech },
-                  { label: 'Overall Innovation', score: 6.5, color: CATEGORY_COLORS.Innovation },
-                ].map((row, i) => (
-                  <div key={i}>
-                    <div className="flex justify-between text-xs md:text-sm font-black text-white mb-2">
-                      <span>{row.label}</span>
-                      <span>{row.score}/10</span>
-                    </div>
-                    <div className="h-2.5 bg-[#0A0A0A] rounded-full overflow-hidden border border-[#2A2A2E]">
-                      <div className="h-full rounded-full" style={{ width: `${row.score * 10}%`, backgroundColor: row.color }} />
-                    </div>
-                  </div>
-                ))}
+              <div className="grid grid-cols-2 gap-4 mt-auto">
+                 <div className="bg-[#161616] border border-[#2A2A2E] p-5 rounded-2xl flex flex-col justify-center">
+                    <span className="block text-2xl md:text-3xl font-black text-white mb-1">50+</span>
+                    <span className="text-[10px] font-bold text-[#71717A] uppercase tracking-widest">Active Pitches</span>
+                 </div>
+                 <div className="bg-[#161616] border border-[#2A2A2E] p-5 rounded-2xl flex flex-col justify-center">
+                    <span className="block text-2xl md:text-3xl font-black text-white mb-1">100%</span>
+                    <span className="text-[10px] font-bold text-[#71717A] uppercase tracking-widest">Real Brands</span>
+                 </div>
               </div>
-
-              <p className="text-[#A1A1AA] text-sm md:text-base font-bold italic border-t border-[#2A2A2E] pt-6 mt-auto">
-                "Strong lateral marketing angles, but the technical execution needed much sharper scoping to be viable."
-              </p>
             </div>
-          </ScrollReveal>
-        </div>
+
+          </div>
+        </ScrollReveal>
       </section>
 
-      {/* 8. FAQ */}
+      
+
+      {/* 9. FAQ */}
       <section className="py-16 md:py-24 px-4 md:px-8 bg-transparent border-t border-[#2A2A2E]">
         <div className="max-w-3xl mx-auto">
           <ScrollReveal>
@@ -911,7 +944,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 9. FINAL COUNTDOWN CTA */}
+      {/* 10. FINAL COUNTDOWN CTA */}
       <section className="py-16 md:py-24 px-4 md:px-8 max-w-[1600px] mx-auto relative z-10">
         <ScrollReveal>
           <div className="bg-[#1C1C1E]/80 backdrop-blur-md border border-[#2A2A2E] rounded-2xl md:rounded-[3rem] p-8 md:p-20 text-center flex flex-col items-center shadow-2xl relative overflow-hidden">
