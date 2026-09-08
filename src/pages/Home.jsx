@@ -32,7 +32,6 @@ import preparation2 from '../imports/preparation2.mp4';
 import pizza from '../imports/pizza.mp4';
 import prep from '../imports/prep.mp4';
 import chaos from '../imports/chaos.mp4';
-import celebration4 from '../imports/celebration4.mp4';
 import celebration3 from '../imports/celebration3.mp4';
 
 import img6 from '../imports/img6.jpg';
@@ -82,7 +81,6 @@ const PROCESS_CLIPS = [
   { src: intervie, label: '02 / INSIGHT DHUNDO', className: 'md:col-span-5' },
   { src: chaos, label: '03 / FIRST IDEA TODO', className: 'md:col-span-5' },
   { src: prep, label: '04 / CASE BANAO', className: 'md:col-span-5' },
-  { src: celebration4, label: '05 / SUBMIT KARO', className: 'md:col-span-7' },
 ];
 
 // --- MAP DATA ---
@@ -267,7 +265,7 @@ export default function Home() {
   const waitlistRank = 2843;
 
   const heroVideos = [
-    travel, intervie, preparation2, pizza, prep, chaos, celebration4, celebration3
+    travel, intervie, preparation2, pizza, prep, chaos, celebration3
   ].filter(Boolean); 
   
   const heroRedHooks = [
@@ -327,7 +325,7 @@ export default function Home() {
   }, [heroVideos.length]);
 
   useEffect(() => {
-    const targetDate = new Date('2026-08-31T00:00:00Z').getTime();
+    const targetDate = new Date('2026-10-20T00:00:00Z').getTime();
     const tick = () => {
       const distance = targetDate - Date.now();
       if (distance < 0) { setCountdown({ days: 0, hours: 0, minutes: 0 }); return; }
@@ -455,7 +453,7 @@ export default function Home() {
       {/* COUNTDOWN BANNER */}
       <div className="fixed top-0 w-full h-10 bg-[#0A0A0A]/80 backdrop-blur-md text-[#FAFAFA] px-4 md:px-6 text-center text-[10px] md:text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 md:gap-3 z-[60] border-b border-[#2A2A2E]">
         <span className="text-[#E92A39] animate-pulse">LIVE</span>
-        <span className="hidden sm:inline">Launching in</span> {countdown.days}d {countdown.hours}h {countdown.minutes}m --
+        <span className="hidden sm:inline">Launching this Dussehra in</span> {countdown.days}d {countdown.hours}h {countdown.minutes}m --
         <button onClick={scrollToWaitlist} className="underline hover:text-[#E92A39] transition-colors">Join</button>
       </div>
 
@@ -501,7 +499,7 @@ export default function Home() {
             {waitlistStatus !== 'success' ? (
               <>
                 <p className="text-base md:text-2xl text-[#A1A1AA] mb-8 md:mb-10 max-w-xl font-bold animate-text-fade-up" style={{ animationDelay: '100ms' }}>
-                  Register before August 31st to get the first briefs the moment they drop.
+                  Register before Dussehra (October 20th) to get the first briefs the moment they drop.
                 </p>
                 <div id="waitlist-form" className="mt-4 md:mt-6 w-full scroll-mt-32 animate-text-fade-up" style={{ animationDelay: '200ms' }}>
                   <div className="flex flex-col sm:flex-row gap-3 w-full max-w-lg">
@@ -529,7 +527,7 @@ export default function Home() {
                   </span>
                 </div>
                 <p className="text-[#A1A1AA] text-sm md:text-base font-bold mb-6 leading-relaxed">
-                  The vault opens Aug 31st. Want early access? Move up <strong className="text-white">50 spots</strong> for every peer who joins using your link.
+                  The vault opens on Dussehra (Oct 20th). Want early access? Move up <strong className="text-white">50 spots</strong> for every peer who joins using your link.
                 </p>
                 <div className="flex items-center gap-2 bg-[#0A0A0A] p-1.5 md:p-2 rounded-xl border border-[#2A2A2E]">
                   <input 
@@ -573,7 +571,7 @@ export default function Home() {
               
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-[2px] opacity-0 md:group-hover:opacity-100 transition-all duration-300 z-20">
                 <Lock className="w-6 h-6 md:w-8 md:h-8 text-white mb-2" />
-                <span className="bg-[#E92A39] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">Unlocks Aug 31</span>
+                <span className="bg-[#E92A39] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">Unlocks on Dussehra (Oct 20)</span>
               </div>
 
               <div className="relative z-10 p-4 md:p-5 h-full flex flex-col justify-end">
@@ -764,7 +762,7 @@ export default function Home() {
                               <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full bg-white/10 border border-white/5 text-white/90 shadow-sm">{opp.type}</span>
                               <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full bg-white/10 border border-white/5 text-white/90 shadow-sm">PPO Pathway</span>
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full bg-[#10B981] text-white w-fit shadow-sm">Opens 31st Aug</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full bg-[#10B981] text-white w-fit shadow-sm">Opens on Dussehra (Oct 20)</span>
                           </div>
                           <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white backdrop-blur-md border border-white/5 shadow-sm">↗</div>
                         </div>
@@ -950,7 +948,7 @@ export default function Home() {
           <div className="bg-[#1C1C1E]/80 backdrop-blur-md border border-[#2A2A2E] rounded-2xl md:rounded-[3rem] p-8 md:p-20 text-center flex flex-col items-center shadow-2xl relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-t from-[#E92A39]/10 to-transparent pointer-events-none"></div>
             <h2 className="text-3xl md:text-6xl font-black tracking-tight text-white mb-4 md:mb-6 relative z-10">
-              Vault opens August 31st.
+              Vault opens this Dussehra, October 20th.
             </h2>
             <p className="text-[#A1A1AA] text-sm md:text-lg font-bold mb-8 md:mb-10 max-w-xl relative z-10">
               Don't miss the first cohort of live briefs. Join the waitlist to secure early access.
