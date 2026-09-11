@@ -26,13 +26,14 @@ import ingenxPosterBg from '../imports/IngenX (2).png';
 import evereadyBg from '../imports/eveready.png';
 
 // --- HERO VIDEOS ---
-import travel from '../imports/travel.mp4';
+
 import intervie from '../imports/intervie.mp4';
 import preparation2 from '../imports/preparation2.mp4';
 import pizza from '../imports/pizza.mp4';
 import prep from '../imports/prep.mp4';
 import chaos from '../imports/chaos.mp4';
 import celebration3 from '../imports/celebration3.mp4';
+import packing from '../imports/packing.mp4';
 
 import img6 from '../imports/img6.jpg';
 import img7 from '../imports/img7.png';
@@ -76,18 +77,29 @@ const REWARD_IMAGES = [
   "https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=800&auto=format&fit=crop"  
 ];
 
+// --- PROCESS SECTION DATA (Updated to use packing.mp4) ---
 const PROCESS_CLIPS = [
-  { src: preparation2, label: '01 / BRIEF PADHO', className: 'md:col-span-7 md:row-span-2' },
-  { src: intervie, label: '02 / INSIGHT DHUNDO', className: 'md:col-span-5' },
-  { src: chaos, label: '03 / FIRST IDEA TODO', className: 'md:col-span-5' },
-  { src: prep, label: '04 / CASE BANAO', className: 'md:col-span-5' },
+  { src: packing, label: '01 / BRIEF PADHO' },
+  { src: intervie, label: '02 / INSIGHT DHUNDO' },
+  { src: chaos, label: '03 / FIRST IDEA TODO' },
+  { src: prep, label: '04 / CASE BANAO' },
 ];
+
+// --- HERO HEADLINE HOOKS (moved to module scope — was being re-allocated every render) ---
+const HERO_RED_HOOKS = [
+  "sabse bade problems.", "real, unfiltered briefs.", "whiteboard war rooms.", 
+  "late-night build sessions.", "mentorship moments.", "campus showdowns.", 
+  "massive prize pools.", "your 'I made it' era." 
+];
+
+// --- FILTER TABS (moved to module scope — was duplicated as two separate
+// inline array literals that could silently drift out of sync) ---
+const CATEGORY_FILTERS = ['All', 'Marketing', 'Tech', 'Design', 'Sustainability', 'Innovation'];
 
 // --- MAP DATA ---
 const OUTREACH_CITIES = [
   { name: "Delhi", lat: 28.6139, lng: 77.2090, companies: ["Nuvoco", "Eveready Industries"] },
   { name: "Gurugram", lat: 28.4595, lng: 77.0266, companies: ["TrooTech", "Zomato"] },
-  { name: "Mumbai", lat: 19.0760, lng: 72.8777, companies: ["Legrand", "SRMB Steel"] },
   { name: "Pune", lat: 18.5204, lng: 73.8567, companies: ["Tech Mahindra", "Bajaj Auto"] },
   { name: "Bengaluru", lat: 12.9716, lng: 77.5946, companies: ["IngenX", "Wipro"] },
   { name: "Kolkata", lat: 22.5726, lng: 88.3639, companies: ["ITC Limited", "SRMB Steel"] }
@@ -169,7 +181,9 @@ function OutreachGlobe({ onCityClick, selectedCity }) {
     // Initial camera position centered on India
     if (globeEl.current) {
       globeEl.current.pointOfView({ lat: 21.5937, lng: 78.9629, altitude: 0.8 }, 2000);
-      globeEl.current.controls().enableZoom = false; // Locks the scroll wheel so users don't zoom into the ocean
+      globeEl.current.controls().enableZoom = false;
+      // Perf: make sure the orbit controls aren't spinning the scene when idle
+      globeEl.current.controls().autoRotate = false;
     }
 
     // Fetch India State Borders GeoJSON
@@ -190,20 +204,30 @@ function OutreachGlobe({ onCityClick, selectedCity }) {
     }
   }, [selectedCity]);
 
-  // Keep globe responsive to window resizes
+  // Keep globe responsive to window resizes (debounced — resize can fire
+  // dozens of times during a drag, and each one was forcing a full WebGL
+  // canvas resize + re-render, which is one of the heavier perf costs here)
   useEffect(() => {
+    let resizeTimeout;
     const handleResize = () => {
-      if (containerRef.current) {
-        setDimensions({
-          width: containerRef.current.offsetWidth,
-          height: containerRef.current.offsetHeight
-        });
-      }
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        if (containerRef.current) {
+          setDimensions({
+            width: containerRef.current.offsetWidth,
+            height: containerRef.current.offsetHeight
+          });
+        }
+      }, 150);
     };
     handleResize();
-    setTimeout(handleResize, 100); // Failsafe for initial DOM paint
+    const initialTimeout = setTimeout(handleResize, 100);
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimeout);
+      clearTimeout(initialTimeout);
+    };
   }, []);
 
   return (
@@ -214,11 +238,13 @@ function OutreachGlobe({ onCityClick, selectedCity }) {
         height={dimensions.height}
         backgroundColor="rgba(0,0,0,0)"
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
+        rendererConfig={{ antialias: false, alpha: true, powerPreference: 'low-power' }}
         polygonsData={statesData}
         polygonAltitude={0.005}
-        polygonCapColor={() => 'rgba(233, 42, 57, 0.05)'} // Subtle red state tint
-        polygonSideColor={() => 'rgba(0, 0, 0, 0)'}
-        polygonStrokeColor={() => 'rgba(233, 42, 57, 0.4)'} // Defined state lines
+        polygonCapColor="rgba(233, 42, 57, 0.05)"
+        polygonSideColor="rgba(0, 0, 0, 0)"
+        polygonStrokeColor="rgba(233, 42, 57, 0.4)"
+        polygonsTransitionDuration={0}
         htmlElementsData={OUTREACH_CITIES}
         htmlElement={d => {
           const el = document.createElement('div');
@@ -237,8 +263,45 @@ function OutreachGlobe({ onCityClick, selectedCity }) {
           };
           return el;
         }}
-        onGlobeClick={() => onCityClick(null)} // Click oceans/earth to zoom out
+        onGlobeClick={() => onCityClick(null)} 
       />
+    </div>
+  );
+}
+
+// --- CROSSFADE VIDEO PLAYER (perf) ---
+// Renders one <video> per clip, stacked, and only ever toggles opacity/
+// playback between them instead of unmounting. The old approach put a
+// React `key` on a single <video>, which forced React to destroy and
+// recreate the whole DOM node — restarting decode — every few seconds.
+// That was the main source of the periodic stutter. Clips are mounted
+// once and reused, so switching is just an opacity transition.
+function CrossfadeVideoPlayer({ clips, activeIndex, poster, className = '', videoClassName = '' }) {
+  const videoRefs = useRef([]);
+
+  useEffect(() => {
+    const activeVideo = videoRefs.current[activeIndex];
+    if (activeVideo) {
+      const playPromise = activeVideo.play();
+      if (playPromise && playPromise.catch) playPromise.catch(() => {});
+    }
+  }, [activeIndex]);
+
+  return (
+    <div className={`relative w-full h-full ${className}`}>
+      {clips.map((clip, i) => (
+        <video
+          key={clip.src || i}
+          ref={el => (videoRefs.current[i] = el)}
+          src={clip.src}
+          poster={i === 0 ? poster : undefined}
+          muted
+          loop
+          playsInline
+          preload={Math.abs(i - activeIndex) <= 1 ? 'auto' : 'metadata'}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[1200ms] ease-out ${i === activeIndex ? 'opacity-100' : 'opacity-0'} ${videoClassName}`}
+        />
+      ))}
     </div>
   );
 }
@@ -257,22 +320,15 @@ export default function Home() {
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0 });
   const [openFaq, setOpenFaq] = useState(-1);
   const [heroVideoIndex, setHeroVideoIndex] = useState(0);
-  const [selectedCity, setSelectedCity] = useState(null); // Triggers the map side-stat swap
+  const [processVideoIndex, setProcessVideoIndex] = useState(0); // NEW: State for process video loop
+  const [selectedCity, setSelectedCity] = useState(null); 
 
   const teaserScrollRef = useRef(null);
-
-  // Seeded mock rank for the queue mechanic
   const waitlistRank = 2843;
 
   const heroVideos = [
-    travel, intervie, preparation2, pizza, prep, chaos, celebration3
-  ].filter(Boolean); 
-  
-  const heroRedHooks = [
-    "sabse bade problems.", "real, unfiltered briefs.", "whiteboard war rooms.", 
-    "late-night build sessions.", "mentorship moments.", "campus showdowns.", 
-    "massive prize pools.", "your 'I made it' era." 
-  ];
+     intervie, preparation2, pizza, prep, chaos, celebration3
+  ].filter(Boolean).map(src => ({ src })); 
 
   const scrollTrack = (ref, direction) => {
     if (ref.current) {
@@ -301,14 +357,12 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Hero video rotation: the first clip (and its matching red hook line) holds
-  // for FIRST_DURATION so the opener has room to land, then the rest of the
-  // reel cycles at the normal LOOP_DURATION pace.
+  // --- HERO VIDEO ROTATION (8s first, then 4s loop) ---
   useEffect(() => {
     if (heroVideos.length <= 1) return;
 
-    const FIRST_DURATION = 8000; // ms the first slot stays on screen
-    const LOOP_DURATION = 4000;  // ms per slot after that
+    const FIRST_DURATION = 8000; 
+    const LOOP_DURATION = 4000;  
 
     let intervalId;
     const firstTimeout = setTimeout(() => {
@@ -323,6 +377,16 @@ export default function Home() {
       if (intervalId) clearInterval(intervalId);
     };
   }, [heroVideos.length]);
+
+  // --- PROCESS SECTION VIDEO ROTATION (5s loop) ---
+  useEffect(() => {
+    if (PROCESS_CLIPS.length <= 1) return;
+    const processIntervalId = setInterval(() => {
+      setProcessVideoIndex((prevIndex) => (prevIndex + 1) % PROCESS_CLIPS.length);
+    }, 5000); // Cycles exactly every 5 seconds
+
+    return () => clearInterval(processIntervalId);
+  }, []);
 
   useEffect(() => {
     const targetDate = new Date('2026-10-20T00:00:00Z').getTime();
@@ -414,15 +478,11 @@ export default function Home() {
     { q: "Submit kiya, jeeta nahi — waste gaya?", a: "Bilkul nahi. You still get 'The Rejection Letter' — a real scorecard on your Insight, Strategy aur Execution. Actual feedback, participation trophy nahi." }
   ];
 
-  const filters = ['All', 'Marketing', 'Tech', 'Design', 'Sustainability', 'Innovation'];
   const filteredOpportunities = opportunities.filter(opp => {
     const matchesFilter = activeFilter === 'All' || opp.category === activeFilter;
     const matchesSearch = searchQuery === '' || opp.title?.toLowerCase().includes(searchQuery.toLowerCase()) || opp.company?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
-
-  // Pre-launch: no real "squads mid-brief" number exists yet.
-  const liveSquadCount = 0;
 
   return (
     <div className="grain min-h-screen bg-transparent text-[#FAFAFA] font-sans overflow-x-hidden relative selection:bg-[#E92A39] selection:text-white">
@@ -480,7 +540,7 @@ export default function Home() {
       <section className="relative w-full min-h-[100dvh] flex items-start justify-center overflow-hidden bg-transparent pb-24 lg:pb-32 pt-[22vh] md:pt-[28vh]">
         <div className="absolute inset-0 bg-transparent">
           {heroVideos && heroVideos.length > 0 ? (
-            <video key={heroVideoIndex} src={heroVideos[heroVideoIndex]} poster={billboardImage} autoPlay muted playsInline loop className="w-full h-full object-cover opacity-0 animate-video-fade" />
+            <CrossfadeVideoPlayer clips={heroVideos} activeIndex={heroVideoIndex} poster={billboardImage} />
           ) : (
             <ImageWithFallback src={billboardImage} alt="InGenuityX" className="w-full h-full object-cover opacity-80" />
           )}
@@ -491,8 +551,8 @@ export default function Home() {
           <div className="w-full lg:w-4/5 xl:w-3/5">
             <h1 className="text-4xl md:text-6xl lg:text-[72px] font-extrabold tracking-tight mb-4 md:mb-6 leading-[1.1] md:leading-[1.05] text-[#FAFAFA] flex flex-col items-start min-h-[90px] md:min-h-[160px]">
               <span className="block">Duniya ke sabse bade brands ke</span>
-              <span key={heroVideoIndex} className="text-[#E92A39] block animate-text-fade-up mt-1 md:mt-2">
-                {heroRedHooks[heroVideoIndex % heroRedHooks.length]}
+              <span key={`hook-${heroVideoIndex}`} className="text-[#E92A39] block animate-text-fade-up mt-1 md:mt-2">
+                {HERO_RED_HOOKS[heroVideoIndex % HERO_RED_HOOKS.length]}
               </span>
             </h1>
             
@@ -598,7 +658,7 @@ export default function Home() {
         
         {/* Mobile: Horizontal Scroll. Desktop: Slanted Accordion */}
         <div className="flex overflow-x-auto md:overflow-visible hide-scrollbar flex-row gap-3 md:gap-4 h-[220px] md:h-[450px] snap-x snap-mandatory pb-4 md:pb-0">
-          {['Marketing', 'Tech', 'Design', 'Sustainability', 'Innovation'].map((catName, i) => {
+          {CATEGORY_FILTERS.filter(f => f !== 'All').map((catName, i) => {
             const catColor = CATEGORY_COLORS[catName] || '#FAFAFA';
             const count = opportunities.filter(o => o.category === catName).length;
             const data = CATEGORY_DATA[catName];
@@ -625,7 +685,14 @@ export default function Home() {
                   <div className="absolute inset-0 z-20 flex flex-col justify-end p-5 md:p-8 md:transform md:skew-x-6 pointer-events-none">
                     {/* Default View */}
                     <div className="md:absolute md:bottom-6 md:left-8 transition-all duration-300 md:group-hover:opacity-0 md:group-hover:translate-y-4">
-                      <h4 className="text-2xl md:text-xl lg:text-3xl font-black text-white uppercase tracking-widest drop-shadow-lg" style={{ color: catColor }}>
+                      <h4 
+                        className={`text-2xl md:text-xl font-black text-white uppercase drop-shadow-lg ${
+                          catName.length > 10 
+                            ? 'lg:text-xl xl:text-2xl tracking-wide' 
+                            : 'lg:text-3xl tracking-widest'
+                        }`} 
+                        style={{ color: catColor }}
+                      >
                         {catName}
                       </h4>
                       <p className="text-[#A1A1AA] text-xs font-bold uppercase tracking-widest mt-1 bg-black/60 md:bg-black/40 px-2 py-1 w-fit rounded">{count} Live</p>
@@ -633,7 +700,11 @@ export default function Home() {
 
                     {/* Desktop Hover Reveal */}
                     <div className="hidden md:flex opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 delay-200 flex-col items-start h-full justify-center pl-2 md:pl-6 w-[120%] md:w-full">
-                      <h4 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 tracking-tight drop-shadow-lg">{catName}</h4>
+                      <h4 className={`text-3xl md:text-4xl font-black text-white mb-3 tracking-tight drop-shadow-lg ${
+                        catName.length > 10 ? 'lg:text-3xl xl:text-4xl' : 'lg:text-5xl'
+                      }`}>
+                        {catName}
+                      </h4>
                       <p className="text-white/90 text-sm md:text-base font-semibold mb-6 max-w-[220px] md:max-w-sm leading-relaxed drop-shadow-md">{data.desc}</p>
                       <span className="bg-black/30 backdrop-blur-sm border border-white/20 text-white px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span> {count} Live Briefs
@@ -700,7 +771,7 @@ export default function Home() {
             </div>
 
             <div className="flex overflow-x-auto hide-scrollbar gap-2 pb-4 md:pb-6 w-full">
-              {['All', 'Marketing', 'Tech', 'Design', 'Sustainability', 'Innovation'].map(filter => (
+              {CATEGORY_FILTERS.map(filter => (
                 <button 
                   key={filter} 
                   onClick={() => setActiveFilter(filter)} 
@@ -806,14 +877,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. 30 SECONDS INSIDE A CHALLENGE */}
+      {/* 6. SINGLE MERGED PROCESS VIDEO PLAYER */}
       <section id="inside" className="py-16 md:py-28 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-[#2A2A2E] relative overflow-hidden">
         <ScrollReveal>
           <div className="max-w-3xl mb-12 md:mb-16">
-            <div className="mb-5 flex items-center gap-3">
-              
-            </div>
-
             <h2 className="text-3xl md:text-6xl font-black tracking-tight text-white mb-4">
               Read. Argue. Build.
               <br />
@@ -821,35 +888,40 @@ export default function Home() {
             </h2>
 
             <p className="max-w-xl text-base md:text-xl font-bold text-[#A1A1AA]">
-              Brief khulta hai. Ideas clash karte hain. First draft toot-ta hai.
-              Phir kuch genuinely solid banta hai.
+              Brief drops. Group chats blow up. The first draft gets trashed. And then, you build something that actually wins.
             </p>
           </div>
         </ScrollReveal>
 
-        <div className="mt-12 grid auto-rows-[16rem] gap-4 md:grid-cols-12">
-          {PROCESS_CLIPS.map((clip, index) => (
-            <ScrollReveal key={clip.label} className={clip.className} delay={index * 50}>
-              <figure className="group relative overflow-hidden rounded-[2rem] border border-[#2A2A2E] bg-[#161616] h-full w-full">
-                <video
-                  src={clip.src}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  className="h-full w-full object-cover opacity-60 transition duration-700 group-hover:scale-[1.03] group-hover:opacity-90"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none" />
-                <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6 md:p-8">
-                  <span className="font-mono text-xs md:text-sm font-black tracking-[0.16em] text-white">
-                    {clip.label}
-                  </span>
-                  <span className="h-2 w-2 rounded-full bg-[#E92A39] opacity-0 transition group-hover:opacity-100" />
-                </figcaption>
-              </figure>
-            </ScrollReveal>
-          ))}
+        <div className="mt-12 w-full h-[400px] md:h-[600px]">
+          <ScrollReveal className="h-full w-full">
+            <figure className="group relative overflow-hidden rounded-[2.5rem] border border-[#2A2A2E] bg-[#161616] h-full w-full shadow-2xl">
+              <CrossfadeVideoPlayer
+                clips={PROCESS_CLIPS}
+                activeIndex={processVideoIndex}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/40 to-transparent pointer-events-none" />
+              
+              <figcaption className="absolute inset-0 flex flex-col justify-end p-6 md:p-12 z-10">
+                <h3 key={`label-${processVideoIndex}`} className="font-mono text-2xl md:text-4xl lg:text-5xl font-black tracking-[0.16em] text-[#FAFAFA] animate-text-fade-up mb-8 drop-shadow-lg">
+                  {PROCESS_CLIPS[processVideoIndex].label}
+                </h3>
+                
+                {/* Progress Indicators */}
+                <div className="flex gap-3">
+                  {PROCESS_CLIPS.map((_, idx) => (
+                    <div 
+                      key={idx} 
+                      onClick={() => setProcessVideoIndex(idx)} 
+                      className={`h-2 rounded-full cursor-pointer transition-all duration-500 ease-out ${
+                        processVideoIndex === idx ? 'w-12 md:w-20 bg-[#E92A39] shadow-[0_0_10px_#E92A39]' : 'w-3 bg-white/20 hover:bg-white/40'
+                      }`} 
+                    />
+                  ))}
+                </div>
+              </figcaption>
+            </figure>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -925,8 +997,6 @@ export default function Home() {
           </div>
         </ScrollReveal>
       </section>
-
-      
 
       {/* 9. FAQ */}
       <section className="py-16 md:py-24 px-4 md:px-8 bg-transparent border-t border-[#2A2A2E]">
